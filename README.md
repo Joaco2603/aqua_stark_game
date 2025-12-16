@@ -1,107 +1,103 @@
 # Aqua Stark
 
-Un proyecto desarrollado en **Unity** que combina mecánicas de juego interactivas con gráficos modernos.
+An interactive fish video game with a variety of fish that can be acquired using web3.
 
-## 📋 Descripción
+## 🎮 Features
 
-Aqua Stark es un proyecto Unity que explora tecnologías avanzadas de renderizado y gameplay interactivo. El proyecto utiliza el **Universal Render Pipeline (URP)** para optimizar el rendimiento visual.
+- Optimized graphics with URP (Universal Render Pipeline)
+- Configurable input system with Input System
+- Organized and modular scenes
+- Animations and visual effects
+- Custom materials and shaders
 
-## 🎮 Características
-
-- Gráficos optimizados con URP (Universal Render Pipeline)
-- Sistema de entrada configurable con Input System
-- Escenas organizadas y modulares
-- Animaciones y efectos visuales
-- Materiales y shaders personalizados
-
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
 ```
 aqua_stark/
 ├── Assets/
-│   ├── Scripts/          # Código C# del proyecto
-│   ├── Scenes/           # Escenas de Unity
+│   ├── Scripts/          # C# project code
+│   ├── Scenes/           # Unity scenes
 │   ├── assets/
-│   │   ├── animations/   # Archivos de animación
-│   │   ├── materials/    # Materiales y texturas
-│   │   ├── gameObjects/  # Prefabs reutilizables
-│   │   ├── scenes/       # Escenas adicionales
-│   │   └── ceto/         # Recursos específicos
-│   ├── Icons/            # Iconos y sprites
-│   ├── Settings/         # Configuración del proyecto
-│   └── InputSystem_Actions.inputactions  # Configuración de inputs
-├── ProjectSettings/      # Configuración de Unity
-├── Packages/             # Dependencias del proyecto
-└── README.md             # Este archivo
+│   │   ├── animations/   # Animation files
+│   │   ├── materials/    # Materials and textures
+│   │   ├── gameObjects/  # Reusable prefabs
+│   │   ├── scenes/       # Additional scenes
+│   │   └── ceto/         # Specific resources
+│   ├── Icons/            # Icons and sprites
+│   ├── Settings/         # Project configuration
+│   └── InputSystem_Actions.inputactions  # Input configuration
+├── ProjectSettings/      # Unity configuration
+├── Packages/             # Project dependencies
+└── README.md             # This file
 ```
 
-## 🛠️ Requisitos
+## 🛠️ Requirements
 
-- **Unity 2021.3 LTS** o superior
-- **.NET Framework** compatible con la versión de Unity
-- Visual Studio o el editor de código de tu preferencia
+- **Unity 2021.3 LTS** or higher
+- **.NET Framework** compatible with your Unity version
+- Visual Studio or your preferred code editor
 
-## 🚀 Instalación y Configuración
+## 🚀 Installation and Setup
 
-### 1. Clonar el repositorio
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/[tu-usuario]/aqua_stark.git
+git clone https://github.com/[your-username]/aqua_stark.git
 cd aqua_stark
 ```
 
-### 2. Abrir el proyecto en Unity
+### 2. Open the project in Unity
 
-1. Abre **Unity Hub**
-2. Haz clic en "Add" y selecciona la carpeta del proyecto
-3. Abre el proyecto con la versión de Unity correcta
+1. Open **Unity Hub**
+2. Click "Add" and select the project folder
+3. Open the project with the correct Unity version
 
-### 3. Restaurar dependencias
+### 3. Restore dependencies
 
-Las dependencias se restaurarán automáticamente desde el archivo `Packages/manifest.json`.
+Dependencies will be automatically restored from the `Packages/manifest.json` file.
 
-## 🎯 Primeros Pasos
+## 🎯 Getting Started
 
-1. Abre la escena principal desde `Assets/Scenes/my_scene.unity`
-2. Presiona **Play** para probar el juego
-3. Consulta la documentación de scripts en `Assets/Scripts/`
+1. Open the main scene from `Assets/Scenes/my_scene.unity`
+2. Press **Play** to test the game
+3. Check the script documentation in `Assets/Scripts/`
 
-## 📚 Documentación
+## 📚 Documentation
 
-- [Documentación de Unity](https://docs.unity.com/)
+- [Unity Documentation](https://docs.unity.com/)
 - [URP Documentation](https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal/latest)
 - [Input System Guide](https://docs.unity3d.com/Packages/com.unity.inputsystem/latest)
 
-## 🤝 Contribuir
+## 🤝 Contributing
 
-¡Las contribuciones son bienvenidas! Para contribuir:
+Contributions are welcome! To contribute:
 
-1. Haz un fork del proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+1. Fork the project
+2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📝 Licencia
+## 📝 License
 
-Este proyecto está bajo licencia **MIT**. Ver el archivo `LICENSE` para más detalles.
+This project is under the **MIT** license. See the `LICENSE` file for more details.
 
-## 👤 Autor
+## 👤 Author
 
 **Aqua Stark Development Team**
 
-## 📧 Contacto
+## 📧 Contact
 
-Para preguntas o sugerencias, puedes contactar a través de:
-- Issues en GitHub
+For questions or suggestions, you can contact us through:
+- GitHub Issues
 - Pull Requests
 
-## 🔗 Links Útiles
+## 🔗 Useful Links
 
-- [GitHub Repository](https://github.com/[tu-usuario]/aqua_stark)
+- [GitHub Repository](https://github.com/[your-username]/aqua_stark)
 - [Unity Learn](https://learn.unity.com/)
 - [Community Forums](https://forum.unity.com/)
 
 ---
 
-**Última actualización:** Diciembre 2025
+**Last updated:** December 2025
