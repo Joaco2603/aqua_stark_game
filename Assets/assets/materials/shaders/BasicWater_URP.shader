@@ -1,54 +1,62 @@
-Shader "Custom/URP/BasicWater"
+Shader "Custom/URP/RealisticWater"
 {
     Properties
-    {
-        _ShallowColor ("Shallow Water Color", Color) = (0.325, 0.807, 0.971, 0.725)
-        _DeepColor ("Deep Water Color", Color) = (0.086, 0.407, 1, 0.749)
-        
-        [Header(Surface)]
-        _Smoothness ("Smoothness", Range(0,1)) = 0.95
-        _NormalStrength ("Normal Strength", Range(0, 1)) = 0.3
-        _NormalMap ("Normal Map", 2D) = "bump" {}
-        
-        [Header(Animation)]
-        _WaveSpeed ("Wave Speed", Float) = 0.1
-        _WaveTiling ("Wave Tiling", Float) = 1.0
-        
-        [Header(Depth Fade)]
-        _DepthFadeDistance ("Depth Fade Distance", Float) = 1.0
-        
-        [Header(Fresnel)]
-        _FresnelBias ("Fresnel Bias", Range(0, 1)) = 0.0
-        _FresnelStrength ("Fresnel Strength", Range(0, 5)) = 2.0
-    }
+{
+    [Header(Colors)]
+    // Reducir a�n m�s el alpha para mayor transparencia
+    _ShallowColor ("Shallow Water Color", Color) = (0.32, 0.8, 0.97, 0.01)  // era 0.02
+    _DeepColor ("Deep Water Color", Color) = (0.08, 0.4, 1.0, 0.02)         // era 0.05
+    _FoamColor ("Foam Color", Color) = (1, 1, 1, 0.3)                       // Reducir foam tambi�n
     
+    [Header(Surface)]
+    _Smoothness ("Smoothness", Range(0,1)) = 0.95
+    _NormalMap ("Normal Map", 2D) = "bump" {}
+    _NormalStrength ("Normal Strength", Range(0, 2)) = 0.5                  // Reducir para menos distorsi�n
+    _NormalTiling ("Normal Tiling", Float) = 1.0
+    _NormalSpeed ("Normal Speed", Float) = 0.1
+    
+    [Header(Waves Vertex)]
+    _WaveHeight ("Wave Height", Range(0, 1)) = 0.05                         // Olas m�s sutiles
+    _WaveFrequency ("Wave Frequency", Float) = 1.0
+    _WaveSpeed ("Wave Speed", Float) = 1.0
+    
+    [Header(Depth and Foam)]
+    _DepthFadeDistance ("Depth Fade Distance", Float) = 10.0                 // Aumentar para m�s transparencia
+    _RefractionStrength ("Refraction Strength", Range(0, 0.5)) = 0.02      // Reducir refracci�n
+    _FoamSize ("Foam Size", Range(0, 2)) = 0.3                              // Menos foam visible
+}
+
     SubShader
     {
         Tags 
         { 
-            "Queue"="Transparent" 
+            "RenderPipeline"="UniversalPipeline" 
             "RenderType"="Transparent" 
-            "RenderPipeline"="UniversalPipeline"
+            "Queue"="Transparent" 
         }
-        
+
         Pass
         {
             Name "ForwardLit"
             Tags { "LightMode" = "UniversalForward" }
-            
+
             Blend SrcAlpha OneMinusSrcAlpha
             ZWrite Off
-            
+            Cull Back
+
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _ _SHADOWS_SOFT
             #pragma multi_compile_fog
-            
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
-            
+
             struct Attributes
             {
                 float4 positionOS : POSITION;
@@ -56,111 +64,142 @@ Shader "Custom/URP/BasicWater"
                 float4 tangentOS : TANGENT;
                 float2 uv : TEXCOORD0;
             };
-            
+
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
                 float3 positionWS : TEXCOORD0;
                 float3 normalWS : TEXCOORD1;
-                float4 tangentWS : TEXCOORD2;
+                float3 viewDirWS : TEXCOORD2;
                 float2 uv : TEXCOORD3;
                 float4 screenPos : TEXCOORD4;
                 float fogFactor : TEXCOORD5;
+                float3 tangentWS : TEXCOORD6;
+                float3 bitangentWS : TEXCOORD7;
             };
-            
-            TEXTURE2D(_NormalMap);
-            SAMPLER(sampler_NormalMap);
-            
+
             CBUFFER_START(UnityPerMaterial)
                 float4 _ShallowColor;
                 float4 _DeepColor;
+                float4 _FoamColor;
                 float _Smoothness;
                 float _NormalStrength;
-                float4 _NormalMap_ST;
+                float _NormalTiling;
+                float _NormalSpeed;
+                float _WaveHeight;
+                float _WaveFrequency;
                 float _WaveSpeed;
-                float _WaveTiling;
                 float _DepthFadeDistance;
-                float _FresnelBias;
-                float _FresnelStrength;
+                float _FoamSize;
+                float _RefractionStrength;
+                float4 _NormalMap_ST;
             CBUFFER_END
-            
+
+            TEXTURE2D(_NormalMap);
+            SAMPLER(sampler_NormalMap);
+
             Varyings vert(Attributes input)
             {
                 Varyings output;
-                
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
-                VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
-                
-                output.positionCS = vertexInput.positionCS;
-                output.positionWS = vertexInput.positionWS;
-                output.normalWS = normalInput.normalWS;
-                output.tangentWS = float4(normalInput.tangentWS, input.tangentOS.w);
-                output.uv = input.uv;
+
+                float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
+
+                // Simple Vertex Waves
+                float time = _Time.y * _WaveSpeed;
+                float wave = sin(positionWS.x * _WaveFrequency + time) * 0.5 + 
+                             cos(positionWS.z * _WaveFrequency * 0.8 + time * 0.8) * 0.5;
+                positionWS.y += wave * _WaveHeight;
+
+                output.positionCS = TransformWorldToHClip(positionWS);
+                output.positionWS = positionWS;
                 output.screenPos = ComputeScreenPos(output.positionCS);
-                output.fogFactor = ComputeFogFactor(output.positionCS.z);
+                output.uv = TRANSFORM_TEX(input.uv, _NormalMap);
+
+                VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
+                output.normalWS = normalInput.normalWS;
+                output.tangentWS = normalInput.tangentWS;
+                output.bitangentWS = normalInput.bitangentWS;
                 
+                output.viewDirWS = GetWorldSpaceViewDir(positionWS);
+                output.fogFactor = ComputeFogFactor(output.positionCS.z);
+
                 return output;
             }
-            
+
             half4 frag(Varyings input) : SV_Target
             {
-                // Animated wave normals
-                float2 uv1 = input.uv * _WaveTiling + _Time.y * _WaveSpeed * float2(1, 0.5);
-                float2 uv2 = input.uv * _WaveTiling * 0.7 - _Time.y * _WaveSpeed * float2(0.5, 1);
+                // 1. Normal Mapping
+                float2 uvScroll1 = input.uv * _NormalTiling + float2(_Time.y * _NormalSpeed, _Time.y * _NormalSpeed * 0.5);
+                float2 uvScroll2 = input.uv * _NormalTiling * 0.7 - float2(_Time.y * _NormalSpeed * 0.8, _Time.y * _NormalSpeed);
                 
-                float3 normal1 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv1));
-                float3 normal2 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv2));
-                float3 tangentNormal = normalize(normal1 + normal2);
+                half3 normal1 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uvScroll1));
+                half3 normal2 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uvScroll2));
+                half3 tangentNormal = normalize(normal1 + normal2);
                 tangentNormal.xy *= _NormalStrength;
                 
-                // Transform normal to world space
-                float3 bitangent = cross(input.normalWS, input.tangentWS.xyz) * input.tangentWS.w;
-                float3x3 TBN = float3x3(input.tangentWS.xyz, bitangent, input.normalWS);
-                float3 normalWS = normalize(mul(tangentNormal, TBN));
-                
-                // Calculate depth
+                float3 normalWS = TransformTangentToWorld(tangentNormal, half3x3(input.tangentWS, input.bitangentWS, input.normalWS));
+                normalWS = normalize(normalWS);
+
+                // 2. Depth & Refraction
                 float2 screenUV = input.screenPos.xy / input.screenPos.w;
-                float sceneDepth = LinearEyeDepth(SampleSceneDepth(screenUV), _ZBufferParams);
+                // Distort UVs for refraction
+                float2 distortedUV = screenUV + (tangentNormal.xy * _RefractionStrength);
+                
+                float rawDepth = SampleSceneDepth(distortedUV);
+                float sceneDepth = LinearEyeDepth(rawDepth, _ZBufferParams);
                 float surfaceDepth = LinearEyeDepth(input.positionCS.z, _ZBufferParams);
-                float depthDifference = sceneDepth - surfaceDepth;
+                float depthDiff = sceneDepth - surfaceDepth;
                 
-                // Depth-based color
-                float depthFade = saturate(depthDifference / _DepthFadeDistance);
-                float3 waterColor = lerp(_ShallowColor.rgb, _DeepColor.rgb, depthFade);
+                // Fix artifacts if distorted depth is in front of water
+                if (depthDiff < 0)
+                {
+                    distortedUV = screenUV;
+                    rawDepth = SampleSceneDepth(distortedUV);
+                    sceneDepth = LinearEyeDepth(rawDepth, _ZBufferParams);
+                    depthDiff = sceneDepth - surfaceDepth;
+                }
+
+                float depthFade = saturate(depthDiff / _DepthFadeDistance);
+
+                // 3. Color & Absorption
+                half3 sceneColor = SampleSceneColor(distortedUV);
+                half3 waterColor = lerp(_ShallowColor.rgb, _DeepColor.rgb, depthFade);
                 
-                // View direction and fresnel
-                float3 viewDirWS = normalize(GetCameraPositionWS() - input.positionWS);
-                float fresnel = _FresnelBias + (1.0 - _FresnelBias) * pow(1.0 - saturate(dot(normalWS, viewDirWS)), _FresnelStrength);
-                
-                // Get scene color for refraction
-                float3 sceneColor = SampleSceneColor(screenUV);
-                
-                // Mix refraction with water color
-                float3 finalColor = lerp(sceneColor, waterColor, saturate(depthFade * 0.8));
-                
-                // Add specular highlights
+                // Ajuste de transparencia para ver el interior
+                //float alpha = lerp(_ShallowColor.a, _DeepColor.a, depthFade);
+                float alpha = lerp(_ShallowColor.a * 0.7, _DeepColor.a * 0.7, depthFade);
+                half3 finalColor = lerp(sceneColor, waterColor, alpha);
+
+                // 4. Foam
+                float foamMask = 1.0 - saturate(depthDiff / _FoamSize);
+                foamMask = pow(foamMask, 4.0); // Sharpen foam
+                // Add some noise to foam using normal map channels
+                float foamNoise = (normal1.x + normal2.y) * 0.5 + 0.5; 
+                foamMask *= foamNoise;
+                finalColor = lerp(finalColor, _FoamColor.rgb, foamMask * _FoamColor.a);
+
+                // 5. Lighting (Specular + Fresnel)
                 Light mainLight = GetMainLight();
-                float3 halfVector = normalize(mainLight.direction + viewDirWS);
-                float NdotH = saturate(dot(normalWS, halfVector));
-                float specular = pow(NdotH, 256.0 * _Smoothness) * _Smoothness;
+                float3 viewDir = normalize(input.viewDirWS);
+                float3 halfDir = normalize(mainLight.direction + viewDir);
+                
+                float NdotL = saturate(dot(normalWS, mainLight.direction));
+                float NdotH = saturate(dot(normalWS, halfDir));
+                float specular = pow(NdotH, 500.0 * _Smoothness) * _Smoothness; // High specular for wet look
+                
+                // Fresnel
+                float fresnel = pow(1.0 - saturate(dot(normalWS, viewDir)), 4.0);
+                
                 finalColor += specular * mainLight.color;
-                
-                // Add reflection based on fresnel
-                float3 reflectVector = reflect(-viewDirWS, normalWS);
-                float3 reflection = GlossyEnvironmentReflection(reflectVector, 1.0 - _Smoothness, 1.0);
-                finalColor = lerp(finalColor, reflection, fresnel * 0.5);
-                
-                // Apply fog
+                finalColor += fresnel * 0.2 * mainLight.color; // Add some sky reflection fake
+
+                // Fog
                 finalColor = MixFog(finalColor, input.fogFactor);
-                
-                // Alpha based on depth
-                float alpha = lerp(_ShallowColor.a, _DeepColor.a, depthFade);
-                
-                return half4(finalColor, alpha);
+
+                return half4(finalColor, 1.0);
             }
             ENDHLSL
         }
     }
-    
-    FallBack "Hidden/Universal Render Pipeline/FallbackError"
+    FallBack "Universal Render Pipeline/Lit"
 }
