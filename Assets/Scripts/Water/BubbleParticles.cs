@@ -4,18 +4,22 @@ using UnityEngine;
 public class BubbleParticles : MonoBehaviour
 {
     [Header("Configuración de Burbujas")]
-    [SerializeField] private float spawnRate = 10f;
+    [SerializeField] private float spawnRate = 5f;
     [SerializeField] private float bubbleSpeed = 0.5f;
     [SerializeField] private float bubbleLifetime = 5f;
-    [SerializeField] private Vector2 bubbleSizeRange = new Vector2(0.05f, 0.15f);
+    [SerializeField] private Vector2 bubbleSizeRange = new Vector2(0.05f, 0.05f);
     
     [Header("Área de Emisión")]
-    [SerializeField] private Vector3 emissionAreaSize = new Vector3(2f, 0.1f, 2f);
+    [SerializeField] private Vector3 emissionAreaSize = new Vector3(0.1f, 0.1f, 0.1f);
+    [SerializeField] private Vector3 emissionOffset = Vector3.zero;
     [SerializeField] private bool spawnFromBottom = true;
+    
+    [Header("Material")]
+    [SerializeField] private Material bubbleMaterial;
     
     [Header("Movimiento")]
     [SerializeField] private float wobbleAmount = 0.1f;
-    [SerializeField] private float wobbleSpeed = 2f;
+    [SerializeField] private float wobbleSpeed = 1f;
     
     private ParticleSystem bubbleSystem;
     private ParticleSystem.MainModule mainModule;
@@ -23,6 +27,7 @@ public class BubbleParticles : MonoBehaviour
     private ParticleSystem.ShapeModule shapeModule;
     private ParticleSystem.VelocityOverLifetimeModule velocityModule;
     private ParticleSystem.SizeOverLifetimeModule sizeModule;
+    private ParticleSystemRenderer particleRenderer;
     
     void Start()
     {
@@ -32,6 +37,11 @@ public class BubbleParticles : MonoBehaviour
     private void InitializeParticleSystem()
     {
         bubbleSystem = GetComponent<ParticleSystem>();
+        particleRenderer = bubbleSystem.GetComponent<ParticleSystemRenderer>();
+        if (particleRenderer != null && bubbleMaterial != null)
+        {
+            particleRenderer.material = bubbleMaterial;
+        }
         
         // Configurar módulo principal
         mainModule = bubbleSystem.main;
@@ -49,6 +59,7 @@ public class BubbleParticles : MonoBehaviour
         shapeModule = bubbleSystem.shape;
         shapeModule.shapeType = ParticleSystemShapeType.Box;
         shapeModule.scale = emissionAreaSize;
+        shapeModule.position = emissionOffset;
         
         // Configurar velocidad con wobble
         velocityModule = bubbleSystem.velocityOverLifetime;
