@@ -6341,7 +6341,7 @@ MonoBehaviour:
     m_Bits: 0
   wormLifetime: 5
   fishTankCenter: {x: 2, y: 9, z: 22}
-  zOffset: -18
+  zOffset: -17
 --- !u!1 &1137451361
 GameObject:
   m_ObjectHideFlags: 0
