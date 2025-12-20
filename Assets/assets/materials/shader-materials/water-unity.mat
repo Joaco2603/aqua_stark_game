@@ -28,9 +28,9 @@ Material:
   - _EMISSION
   m_InvalidKeywords: []
   m_LightmapFlags: 6
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 2000
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
@@ -111,25 +111,25 @@ Material:
     - _ColorAbsorption: 0.1
     - _Cull: 2
     - _Cutoff: 0.5
-    - _DepthFadeDistance: 2
+    - _DepthFadeDistance: 6.74
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
-    - _FoamSize: 0.5
+    - _FoamSize: 0.43
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _Metallic: 0
-    - _NormalSpeed: 0.1
+    - _NormalSpeed: 0.2
     - _NormalStrength: 1
     - _NormalTiling: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _RefractionStrength: 0.1
+    - _RefractionStrength: 0.034
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -146,10 +146,10 @@ Material:
     m_Colors:
     - _BaseColor: {r: 0.3443396, g: 0.5295107, b: 1, a: 1}
     - _Color: {r: 0.34433958, g: 0.5295106, b: 1, a: 1}
-    - _DeepColor: {r: 0.12549022, g: 0.20061217, b: 0.34901962, a: 0.9}
+    - _DeepColor: {r: 0.12549019, g: 0.20061213, b: 0.3490196, a: 0.5803922}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
-    - _ShallowColor: {r: 0.23762906, g: 0.4675284, b: 0.5660378, a: 0.72}
+    - _FoamColor: {r: 1, g: 1, b: 1, a: 0.19215687}
+    - _ShallowColor: {r: 0.6037736, g: 0.58454967, b: 0.3730865, a: 0.72}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

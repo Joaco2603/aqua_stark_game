@@ -16,13 +16,13 @@ Shader "Custom/URP/RealisticWater"
     _NormalSpeed ("Normal Speed", Float) = 0.1
     
     [Header(Waves Vertex)]
-    _WaveHeight ("Wave Height", Range(0, 1)) = 0.05                         // Olas m�s sutiles
+    _WaveHeight ("Wave Height", Range(0, 1)) = 0.05                         // Olas mas sutiles
     _WaveFrequency ("Wave Frequency", Float) = 1.0
     _WaveSpeed ("Wave Speed", Float) = 1.0
     
     [Header(Depth and Foam)]
-    _DepthFadeDistance ("Depth Fade Distance", Float) = 10.0                 // Aumentar para m�s transparencia
-    _RefractionStrength ("Refraction Strength", Range(0, 0.5)) = 0.02      // Reducir refracci�n
+    _DepthFadeDistance ("Depth Fade Distance", Float) = 10.0                 // Aumentar para mas transparencia
+    _RefractionStrength ("Refraction Strength", Range(0, 0.5)) = 0.02      // Reducir refraccion
     _FoamSize ("Foam Size", Range(0, 2)) = 0.3                              // Menos foam visible
 }
 

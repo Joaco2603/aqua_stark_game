@@ -17,12 +17,24 @@ public class FishMove : MonoBehaviour
     [SerializeField] private float bottomOffset = 0.5f; 
     [SerializeField] private bool clampToWater = true; 
     [SerializeField] private bool resetOnEnable = true; 
+
+    [Header("Feeding")]
+    [SerializeField] private float feedStopDistance = 0.3f;
+    [SerializeField] private float feedSpeedMultiplier = 1.4f;
+    [SerializeField] private float feedSurfaceHoldOffset = 0.35f;
+    [SerializeField] private float loseInterestTime = 5f;
+    [SerializeField] private float feedTurnLerp = 6f;
+    [SerializeField] private string foodTag = "Food";
+    [SerializeField] private Transform defaultFoodTarget;
  
     private Rigidbody rb; 
     private Vector3 initialPosition; 
     private Vector3 centerPoint; 
     private Vector3 currentDirection; 
     private float changeTimer; 
+    private bool feeding;
+    private Transform foodTarget;
+    private float timeSinceFoodSeen;
  
     private void Awake() 
     { 
@@ -54,32 +66,41 @@ public class FishMove : MonoBehaviour
  
     private void FixedUpdate() 
     { 
+        if (feeding)
+        {
+            HandleFeeding();
+            AlignRotation(true);
+            ClampWaterHeight();
+            return;
+        }
+
         changeTimer -= Time.fixedDeltaTime; 
- 
+
         if (changeTimer <= 0f || IsLeavingBounds()) 
         { 
             PickNewDirection(false); 
         } 
- 
+
         ApplyMovement(); 
         AlignRotation(); 
         ClampWaterHeight(); 
     } 
  
-    private void ApplyMovement() 
+    private void ApplyMovement(float speedMultiplier = 1f) 
     { 
-        Vector3 desiredVelocity = currentDirection * swimSpeed; 
+        Vector3 desiredVelocity = currentDirection * swimSpeed * speedMultiplier; 
         rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, desiredVelocity, turnLerp * Time.fixedDeltaTime); 
     } 
  
-    private void AlignRotation() 
+    private void AlignRotation(bool isFeeding = false) 
     { 
         Vector3 velocity = rb.linearVelocity; 
         if (velocity.sqrMagnitude < 0.0001f) 
             return; 
  
         Quaternion targetRot = Quaternion.LookRotation(velocity.normalized, Vector3.up); 
-        rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRot, turnLerp * Time.fixedDeltaTime)); 
+        float lerpSpeed = isFeeding ? feedTurnLerp : turnLerp;
+        rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRot, lerpSpeed * Time.fixedDeltaTime)); 
     } 
  
     private void PickNewDirection(bool immediate) 
@@ -124,6 +145,87 @@ public class FishMove : MonoBehaviour
  
         return farFromCenter || outsideHeight; 
     } 
+
+    private void HandleFeeding()
+    {
+        if (foodTarget == null)
+        {
+            foodTarget = FindFoodTarget();
+        }
+
+        if (foodTarget == null)
+        {
+            timeSinceFoodSeen += Time.fixedDeltaTime;
+            MoveToSurfaceHold();
+
+            if (timeSinceFoodSeen > loseInterestTime)
+            {
+                feeding = false;
+                PickNewDirection(true);
+            }
+
+            return;
+        }
+
+        timeSinceFoodSeen = 0f;
+
+        Vector3 targetPos = foodTarget.position;
+        float maxY = waterLevel - surfaceOffset;
+        float minY = waterLevel - waterDepth + bottomOffset;
+        targetPos.y = Mathf.Clamp(targetPos.y, minY + 0.1f, maxY - 0.05f);
+
+        Vector3 toFood = targetPos - transform.position;
+
+        if (toFood.sqrMagnitude <= feedStopDistance * feedStopDistance)
+        {
+            rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, Vector3.zero, turnLerp * Time.fixedDeltaTime);
+            return;
+        }
+
+        currentDirection = toFood.normalized;
+        ApplyMovement(feedSpeedMultiplier);
+    }
+
+    private void MoveToSurfaceHold()
+    {
+        float surfaceY = waterLevel - surfaceOffset - feedSurfaceHoldOffset;
+        Vector3 holdPos = new Vector3(centerPoint.x, surfaceY, centerPoint.z);
+        Vector3 toHold = holdPos - transform.position;
+
+        if (toHold.sqrMagnitude < 0.05f)
+        {
+            rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, Vector3.zero, turnLerp * Time.fixedDeltaTime);
+            return;
+        }
+
+        currentDirection = toHold.normalized;
+        ApplyMovement();
+    }
+
+    private Transform FindFoodTarget()
+    {
+        if (defaultFoodTarget != null)
+            return defaultFoodTarget;
+
+        GameObject taggedFood = GameObject.FindWithTag(foodTag);
+        return taggedFood != null ? taggedFood.transform : null;
+    }
+
+    public void StartFeeding(Transform food = null)
+    {
+        feeding = true;
+        foodTarget = food != null ? food : defaultFoodTarget;
+        timeSinceFoodSeen = 0f;
+        rb.linearVelocity = Vector3.zero;
+        changeTimer = directionChangeInterval * 0.5f;
+    }
+
+    public void StopFeeding()
+    {
+        feeding = false;
+        foodTarget = null;
+        PickNewDirection(true);
+    }
  
     private void ClampWaterHeight() 
     { 

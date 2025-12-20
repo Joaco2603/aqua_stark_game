@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4492f86b8b27ab4469dd8fcc93e2dcea
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - fish: {instanceID: 0}
+  - wormPrefab: {fileID: -6247694177509291895, guid: 937b729bd16ece8478ab26cfad91d7b4, type: 3}
+  - uiToHide: {instanceID: 0}
+  - mainCamera: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
