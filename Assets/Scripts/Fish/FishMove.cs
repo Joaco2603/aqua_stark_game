@@ -26,7 +26,8 @@ public class FishMove : MonoBehaviour
     [SerializeField] private float feedTurnLerp = 6f;
     [SerializeField] private string foodTag = "Food";
     [SerializeField] private Transform defaultFoodTarget;
- 
+    [SerializeField] private int hungerRestoreAmount = 15;
+
     private Rigidbody rb; 
     private Vector3 initialPosition; 
     private Vector3 centerPoint; 
@@ -62,34 +63,47 @@ public class FishMove : MonoBehaviour
             centerPoint = initialPosition; 
             PickNewDirection(true); 
         } 
-    } 
- 
-    private void FixedUpdate() 
-    { 
+    }
+
+    private void FixedUpdate()
+    {
+        // Estado 1: Alimentándose
         if (feeding)
         {
             HandleFeeding();
             AlignRotation(true);
             ClampWaterHeight();
-            return;
+            return; // Detiene la ejecución aquí si está alimentándose
         }
 
-        changeTimer -= Time.fixedDeltaTime; 
+        // Estado 2: Navegación normal (Wandering)
+        UpdateWanderLogic();
+    }
 
-        if (changeTimer <= 0f || IsLeavingBounds()) 
-        { 
-            PickNewDirection(false); 
-        } 
+    private void UpdateWanderLogic()
+    {
+        changeTimer -= Time.fixedDeltaTime;
 
-        ApplyMovement(); 
-        AlignRotation(); 
-        ClampWaterHeight(); 
-    } 
- 
+        if (changeTimer <= 0f || IsLeavingBounds())
+        {
+            PickNewDirection(false);
+        }
+
+        ApplyMovement();
+        AlignRotation();
+        ClampWaterHeight();
+    }
+
     private void ApplyMovement(float speedMultiplier = 1f) 
-    { 
-        Vector3 desiredVelocity = currentDirection * swimSpeed * speedMultiplier; 
-        rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, desiredVelocity, turnLerp * Time.fixedDeltaTime); 
+    {
+        //Vector3 desiredVelocity = currentDirection * swimSpeed * speedMultiplier; 
+        //rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, desiredVelocity, turnLerp * Time.fixedDeltaTime);
+        Vector3 desiredVelocity = currentDirection * swimSpeed * speedMultiplier;
+
+        // Si está alimentándose, queremos que responda mucho más rápido (usamos un multiplicador de giro)
+        float effectiveLerp = feeding ? turnLerp * 2f : turnLerp;
+
+        rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, desiredVelocity, effectiveLerp * Time.fixedDeltaTime);
     } 
  
     private void AlignRotation(bool isFeeding = false) 
@@ -146,45 +160,6 @@ public class FishMove : MonoBehaviour
         return farFromCenter || outsideHeight; 
     } 
 
-    private void HandleFeeding()
-    {
-        if (foodTarget == null)
-        {
-            foodTarget = FindFoodTarget();
-        }
-
-        if (foodTarget == null)
-        {
-            timeSinceFoodSeen += Time.fixedDeltaTime;
-            MoveToSurfaceHold();
-
-            if (timeSinceFoodSeen > loseInterestTime)
-            {
-                feeding = false;
-                PickNewDirection(true);
-            }
-
-            return;
-        }
-
-        timeSinceFoodSeen = 0f;
-
-        Vector3 targetPos = foodTarget.position;
-        float maxY = waterLevel - surfaceOffset;
-        float minY = waterLevel - waterDepth + bottomOffset;
-        targetPos.y = Mathf.Clamp(targetPos.y, minY + 0.1f, maxY - 0.05f);
-
-        Vector3 toFood = targetPos - transform.position;
-
-        if (toFood.sqrMagnitude <= feedStopDistance * feedStopDistance)
-        {
-            rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, Vector3.zero, turnLerp * Time.fixedDeltaTime);
-            return;
-        }
-
-        currentDirection = toFood.normalized;
-        ApplyMovement(feedSpeedMultiplier);
-    }
 
     private void MoveToSurfaceHold()
     {
@@ -248,7 +223,58 @@ public class FishMove : MonoBehaviour
             }
         }
     }
-    
+
+    // Añade estos métodos a tu clase FishMove
+
+    private void OnTriggerEnter(Collider other)
+    {
+        // 1. Detectar comida por proximidad (El "Ojo" del pez)
+        if (other.CompareTag(foodTag) && !feeding)
+        {
+            StartFeeding(other.transform);
+        }
+    }
+
+    private void HandleFeeding()
+    {
+        if (foodTarget == null || !foodTarget.gameObject.activeInHierarchy)
+        {
+            StopFeeding(); // Si la comida desaparece o alguien más se la come
+            HungerManager.Instance.Add(hungerRestoreAmount);
+            return;
+        }
+
+        Vector3 targetPos = foodTarget.position;
+
+        // Mantener la comida dentro de los límites de agua para el pez
+        //float maxY = waterLevel - surfaceOffset;
+        //float minY = waterLevel - waterDepth + bottomOffset;
+        //targetPos.y = Mathf.Clamp(targetPos.y, minY + 0.1f, maxY - 0.05f);
+
+        Vector3 toFood = targetPos - transform.position;
+        float distanceSq = toFood.sqrMagnitude;
+
+        // 2. Lógica de "Comer" (Cuando está muy cerca)
+        if (distanceSq <= feedStopDistance * feedStopDistance)
+        {
+            EatFood();
+            return;
+        }
+
+        // Movimiento hacia la comida
+        currentDirection = toFood.normalized;
+        ApplyMovement(feedSpeedMultiplier);
+    }
+
+    private void EatFood()
+    {
+        if (foodTarget != null)
+        {
+            StopFeeding();
+            Destroy(foodTarget.gameObject);
+        }
+    }
+
     // Método helper para configurar desde el Inspector
     private void OnDrawGizmosSelected()
     {

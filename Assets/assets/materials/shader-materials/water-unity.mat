@@ -30,7 +30,7 @@ Material:
   m_LightmapFlags: 6
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2000
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
@@ -146,10 +146,10 @@ Material:
     m_Colors:
     - _BaseColor: {r: 0.3443396, g: 0.5295107, b: 1, a: 1}
     - _Color: {r: 0.34433958, g: 0.5295106, b: 1, a: 1}
-    - _DeepColor: {r: 0.12549019, g: 0.20061213, b: 0.3490196, a: 0.5803922}
+    - _DeepColor: {r: 0.0682627, g: 0.12726948, b: 0.24528295, a: 0.5254902}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FoamColor: {r: 1, g: 1, b: 1, a: 0.19215687}
-    - _ShallowColor: {r: 0.7830189, g: 0.7470823, b: 0.61681205, a: 0.72}
+    - _ShallowColor: {r: 0, g: 0, b: 0, a: 0.078431375}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
