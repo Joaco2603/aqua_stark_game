@@ -50,6 +50,7 @@ public class FeedFish : MonoBehaviour
 
     public void Feed()
     {
+        Debug.LogWarning("Here");
         if (fish == null && !TryGetComponent(out fish))
         {
             Debug.LogWarning("FeedFish no encontró un FishMove en el mismo objeto", this);
@@ -68,6 +69,7 @@ public class FeedFish : MonoBehaviour
     private void StartFeedingMode()
     {
         feedingMode = true;
+        Debug.LogWarning("Here");
 
         // Ocultar UI
         if (uiToHide != null)
