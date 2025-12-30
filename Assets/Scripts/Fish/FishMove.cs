@@ -22,7 +22,6 @@ public class FishMove : MonoBehaviour
     [SerializeField] private float feedStopDistance = 0.3f;
     [SerializeField] private float feedSpeedMultiplier = 1.4f;
     [SerializeField] private float feedSurfaceHoldOffset = 0.35f;
-    [SerializeField] private float loseInterestTime = 5f;
     [SerializeField] private float feedTurnLerp = 6f;
     [SerializeField] private string foodTag = "Food";
     [SerializeField] private Transform defaultFoodTarget;
@@ -35,7 +34,6 @@ public class FishMove : MonoBehaviour
     private float changeTimer; 
     private bool feeding;
     private Transform foodTarget;
-    private float timeSinceFoodSeen;
  
     private void Awake() 
     { 
@@ -190,7 +188,6 @@ public class FishMove : MonoBehaviour
     {
         feeding = true;
         foodTarget = food != null ? food : defaultFoodTarget;
-        timeSinceFoodSeen = 0f;
         rb.linearVelocity = Vector3.zero;
         changeTimer = directionChangeInterval * 0.5f;
     }

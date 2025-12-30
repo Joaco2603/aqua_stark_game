@@ -8,7 +8,7 @@ public class CameraStackManager : MonoBehaviour
     public bool returnMode = true;
 
     [Tooltip("Distance in units to move the camera forward.")]
-    public float distance =9f;
+    public float distance =3f;
 
     [Tooltip("Time in seconds for the move (one way).")]
     public float duration =0.5f;
