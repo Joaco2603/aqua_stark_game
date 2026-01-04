@@ -20,6 +20,14 @@ public class Menu : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    public void Toggle()
+    {
+        if (gameObject.activeSelf)
+            Close();
+        else
+            Open();
+    }
+
     void SetChildrenActive(bool active)
     {
         for (int i = 0; i < transform.childCount; i++)
