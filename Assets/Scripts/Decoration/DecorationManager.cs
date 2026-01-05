@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UI;
+using Decoration;
 
 /// <summary>
 /// Lead manager who coordinates the entire decoration system
@@ -8,6 +10,7 @@ public class DecorationManager : MonoBehaviour
 {
     [Header("UI Reference")]
     [SerializeField] private DecorationUI decorationUI;
+    [SerializeField] private CameraOrbit cameraOrbit;
 
     [Header("Map Settings")]
     [SerializeField] private List<Vector2> mapPositions = new List<Vector2>()
@@ -22,7 +25,7 @@ public class DecorationManager : MonoBehaviour
 
     [SerializeField] private bool createMapItemsHidden = true;
 
-    // [SerializeField] private List<Sprite> decorationSprites; // Removed to avoid duplication
+    [SerializeField] private GameObject backgroundButtonPrefab;
 
     private void Start()
     {
@@ -54,7 +57,40 @@ public class DecorationManager : MonoBehaviour
             }
             else
             {
-                decorationUI.CreateMapItem(mapPositions[i], icon, createMapItemsHidden);
+                // Crear el item sin ocultarlo aún
+                GameObject item = decorationUI.CreateMapItem(mapPositions[i], icon, false, backgroundButtonPrefab);
+                
+                if (item != null)
+                {
+                    Button btn = item.GetComponent<Button>();
+                    if (btn != null)
+                    {
+                        GameObject prefab = decorationUI.GetPrefabForIcon(icon);
+                        if (prefab != null && cameraOrbit != null)
+                        {
+                            btn.onClick.AddListener(() => {
+                                decorationUI.SetVisible(false);
+                                cameraOrbit.StartPlacing(prefab, () => {
+                                    decorationUI.SetVisible(true);
+                                });
+                            });
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Prefab o CameraOrbit es null para el icono: {icon.name}");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"El item no tiene componente Button: {item.name}");
+                    }
+
+                    // Ocultar después de asignar el listener
+                    if (createMapItemsHidden)
+                    {
+                        item.SetActive(false);
+                    }
+                }
             }
         }
     }

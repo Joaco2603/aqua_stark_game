@@ -11,10 +11,13 @@ namespace Decoration
 
         [Header("Orbit Settings")]
         [SerializeField] private float distance = 10.0f;
+        [SerializeField] private float verticalOffset = 4.0f;
         [SerializeField] private float xSpeed = 0.5f;
         [SerializeField] private float ySpeed = 0.5f;
-        [SerializeField] private float yMinLimit = -20f;
-        [SerializeField] private float yMaxLimit = 80f;
+        [Tooltip("Límite inferior del ángulo vertical (en grados).")]
+        [SerializeField] private float yMinLimit = 0f;
+        [Tooltip("Límite superior del ángulo vertical (en grados).")]
+        [SerializeField] private float yMaxLimit = 60f;
 
         [Header("Pan Settings")]
         [SerializeField] private float panSpeed = 0.02f;
@@ -22,6 +25,27 @@ namespace Decoration
         private float _currentX = 0.0f;
         private float _currentY = 0.0f;
         private bool _isMoveMode = false;
+
+        // Decoration Placement
+        private GameObject _currentPlacingObject;
+        private bool _justStartedPlacing;
+        private System.Action _onPlacementFinished;
+
+        public void StartPlacing(GameObject prefab, System.Action onFinished = null)
+        {
+            if (_currentPlacingObject != null)
+            {
+                Destroy(_currentPlacingObject);
+            }
+
+            _onPlacementFinished = onFinished;
+
+            if (prefab != null)
+            {
+                _currentPlacingObject = Instantiate(prefab);
+                _justStartedPlacing = true;
+            }
+        }
 
         private void Start()
         {
@@ -48,8 +72,12 @@ namespace Decoration
             if (target == null) return;
             if (Mouse.current == null) return;
 
+            if (_currentPlacingObject != null)
+            {
+                HandlePlacement();
+            }
             // Solo procesar si se mantiene presionado el botón izquierdo del mouse
-            if (Mouse.current.leftButton.isPressed)
+            else if (Mouse.current.leftButton.isPressed)
             {
                 Vector2 delta = Mouse.current.delta.ReadValue();
 
@@ -83,10 +111,38 @@ namespace Decoration
 
             // Aplicar transformación
             Quaternion rotation = Quaternion.Euler(_currentY, _currentX, 0);
-            Vector3 position = rotation * new Vector3(0.0f, 0.0f, -distance) + target.position;
+            Vector3 position = rotation * new Vector3(0.0f, 0.0f, -distance) + target.position + Vector3.up * verticalOffset;
 
             transform.rotation = rotation;
             transform.position = position;
+        }
+
+        private void HandlePlacement()
+        {
+            // Raycast desde la cámara
+            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+            
+            // Plano que mira a la cámara pasando por el target
+            Plane plane = new Plane(-transform.forward, target.position);
+            
+            float enter;
+            if (plane.Raycast(ray, out enter))
+            {
+                Vector3 hitPoint = ray.GetPoint(enter);
+                // Fijar Y arriba del target, mantener Z del target, variar X
+                Vector3 newPos = new Vector3(hitPoint.x, target.position.y, target.position.z);
+                _currentPlacingObject.transform.position = newPos;
+            }
+
+            // Confirmar con clic izquierdo
+            if (Mouse.current.leftButton.wasPressedThisFrame && !_justStartedPlacing)
+            {
+                _currentPlacingObject = null;
+                _onPlacementFinished?.Invoke();
+                _onPlacementFinished = null;
+            }
+
+            _justStartedPlacing = false;
         }
 
         private static float ClampAngle(float angle, float min, float max)

@@ -6,7 +6,7 @@ public class DecorationUI : MonoBehaviour
 {
 	[SerializeField] private Canvas targetCanvas;
 	[SerializeField] private Transform mapContainer;
-	[SerializeField] private List<Button> buttonPrefabs = new List<Button>();
+	// [SerializeField] private List<Button> buttonPrefabs = new List<Button>();
 	private Transform defaultParent;
 
 	[System.Serializable]
@@ -67,18 +67,18 @@ public class DecorationUI : MonoBehaviour
 		}
 
 		List<Button> created = new List<Button>();
-		foreach (var prefab in buttonPrefabs)
-		{
-			if (prefab == null) continue;
-			Button inst = Instantiate(prefab, parentTransform);
-			created.Add(inst);
-		}
+		// foreach (var prefab in buttonPrefabs)
+		// {
+		// 	if (prefab == null) continue;
+		// 	Button inst = Instantiate(prefab, parentTransform);
+		// 	created.Add(inst);
+		// }
 
 		return created;
 	}
 
 	// Now returns the created GameObject and optionally creates it hidden (inactive).
-	public GameObject CreateMapItem(Vector2 position, Sprite icon, bool createHidden = false)
+	public GameObject CreateMapItem(Vector2 position, Sprite icon, bool createHidden = false, GameObject buttonPrefab = null)
 	{
 		if (mapContainer == null)
 		{
@@ -86,23 +86,67 @@ public class DecorationUI : MonoBehaviour
 			return null;
 		}
 
-		GameObject item = new GameObject("MapDecoration_" + (icon != null ? icon.name : "null"));
-		item.transform.SetParent(mapContainer, false);
-
-		Image img = item.AddComponent<Image>();
-		img.sprite = icon;
-		img.preserveAspect = true;
+		GameObject item;
+		if (buttonPrefab != null)
+		{
+			item = Instantiate(buttonPrefab, mapContainer);
+			item.name = "MapDecoration_" + (icon != null ? icon.name : "null");
+		}
+		else
+		{
+			item = new GameObject("MapDecoration_" + (icon != null ? icon.name : "null"));
+			item.transform.SetParent(mapContainer, false);
+		}
 
 		RectTransform rt = item.GetComponent<RectTransform>();
-		rt.anchoredPosition = position;
-		rt.sizeDelta = new Vector2(100, 100); // Default size
-
-		if (createHidden)
+		if (rt != null)
 		{
-			item.SetActive(false);
-			mapContainer.gameObject.SetActive(false);
+			rt.anchoredPosition = position;
+			if (buttonPrefab == null)
+			{
+				rt.sizeDelta = new Vector2(100, 100); // Default size
+			}
+		}
+
+		if (buttonPrefab != null)
+		{
+			// Create icon as child so it appears on top of the button
+			GameObject iconObj = new GameObject("Icon");
+			iconObj.transform.SetParent(item.transform, false);
+
+			Image img = iconObj.AddComponent<Image>();
+			img.sprite = icon;
+			img.preserveAspect = true;
+
+			RectTransform iconRt = iconObj.GetComponent<RectTransform>();
+			iconRt.anchoredPosition = Vector2.zero;
+			iconRt.sizeDelta = new Vector2(100, 100);
+		}
+		else
+		{
+			Image img = item.AddComponent<Image>();
+			img.sprite = icon;
+			img.preserveAspect = true;
+		}
+
+		// Asegurar que tenga un componente Button
+		if (item.GetComponent<Button>() == null)
+		{
+			item.AddComponent<Button>();
 		}
 
 		return item;
 	}
+
+    public void SetVisible(bool visible)
+    {
+        if (mapContainer != null)
+        {
+            mapContainer.gameObject.SetActive(visible);
+        }
+        else
+        {
+            gameObject.SetActive(visible);
+        }
+    }
 }

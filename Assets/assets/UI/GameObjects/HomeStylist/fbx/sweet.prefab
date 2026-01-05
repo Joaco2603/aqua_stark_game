@@ -13,6 +13,18 @@ PrefabInstance:
       value: sweet
       objectReference: {fileID: 0}
     - target: {fileID: 3674354985081496043, guid: 4a1b99a15c7f2ba4684fec8efc9403db, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3674354985081496043, guid: 4a1b99a15c7f2ba4684fec8efc9403db, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3674354985081496043, guid: 4a1b99a15c7f2ba4684fec8efc9403db, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3674354985081496043, guid: 4a1b99a15c7f2ba4684fec8efc9403db, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1263.4402
       objectReference: {fileID: 0}

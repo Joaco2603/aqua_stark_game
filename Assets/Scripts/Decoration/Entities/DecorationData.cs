@@ -1,5 +1,8 @@
 using UnityEngine;
 
+
+namespace Decoration
+{
 [System.Serializable]
 public class DecorationData
 {
@@ -19,4 +22,5 @@ public class DecorationData
         this.prefab = prefab;
         this.quantity = quantity;
     }
+}
 }
