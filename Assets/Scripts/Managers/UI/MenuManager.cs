@@ -1,39 +1,54 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Manages menu navigation using a stack-based history system
+/// </summary>
 public class MenuManager : MonoBehaviour
 {
-    [SerializeField] private Menu firstMenu; // El menú que aparece al iniciar
-    private Stack<Menu> menuHistory = new Stack<Menu>();
-
-    void Start()
+    [SerializeField] private Menu firstMenu;
+    private readonly Stack<Menu> menuHistory = new Stack<Menu>();
+    
+    private void Start()
     {
-        if (firstMenu != null) OpenMenu(firstMenu);
+        if (firstMenu != null)
+        {
+            OpenMenu(firstMenu);
+        }
+        else
+        {
+            Debug.LogError("MenuManager: First menu is not assigned!");
+        }
     }
-
+    
+    /// <summary>
+    /// Opens a new menu and adds it to navigation history
+    /// </summary>
     public void OpenMenu(Menu newMenu)
     {
-        // 1. Si hay un menú abierto, lo desactivamos pero lo guardamos en el historial
-        if (menuHistory.Count > 0)
+        if (newMenu == null)
+        {
+            Debug.LogError("MenuManager: Attempted to open null menu");
+            return;
+        }
+        
+        RemoveInvalidMenusFromHistory();
+        
+        // Close current menu if exists
+        if (menuHistory.Count > 0 && menuHistory.Peek() != null)
         {
             menuHistory.Peek().Close();
         }
-
-        // 2. Añadimos el nuevo menú a la pila y lo mostramos
+        
         menuHistory.Push(newMenu);
         newMenu.Open();
     }
-
-    public void Back()
+    
+    private void RemoveInvalidMenusFromHistory()
     {
-        if (menuHistory.Count <= 1) return; // No hay a dónde volver
-
-        // 1. Quitamos el menú actual de la pila y lo cerramos
-        Menu current = menuHistory.Pop();
-        current.Close();
-
-        // 2. El que queda arriba de la pila es el anterior, lo abrimos
-        Menu previous = menuHistory.Peek();
-        previous.Open();
+        while (menuHistory.Count > 0 && menuHistory.Peek() == null)
+        {
+            menuHistory.Pop();
+        }
     }
 }

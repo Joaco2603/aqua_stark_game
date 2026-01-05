@@ -73,7 +73,7 @@ public class FishData : MonoBehaviour
 
             // Try to call a strongly-typed receiver if present (keeps compatibility with FishPopup)
             // Prefer a type-safe receiver (mapper) if present
-            var receiver = menuInstance.GetComponentInChildren<IFishPopupReceiver>();
+            var receiver = menuInstance.GetComponent<IFishPopupReceiver>();
             if (receiver != null)
             {
                 receiver.SetData(this);

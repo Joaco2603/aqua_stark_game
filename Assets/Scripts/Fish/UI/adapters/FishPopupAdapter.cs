@@ -41,34 +41,40 @@ public class FishPopupAdapter : MonoBehaviour, IFishPopupReceiver
         UpdateTexts();
     }
 
-    void OnExpChanged(float val)
+    public void OnExpChanged(float val)
     {
         if (currentFish != null) currentFish.experience = Mathf.RoundToInt(val);
         UpdateTexts();
     }
 
-    void OnHungerChanged(float val)
+    public void OnHungerChanged(float val)
     {
         if (currentFish != null) currentFish.hunger = Mathf.RoundToInt(val);
         UpdateTexts();
     }
 
-    void UpdateTexts()
+    public void UpdateTexts()
     {
         if (currentFish == null) return;
         if (expValueText != null) expValueText.text = currentFish.experience.ToString();
         if (hungerValueText != null) hungerValueText.text = currentFish.hunger.ToString();
     }
 
-    void OnCloseClicked()
+    public void OnCloseClicked()
     {
-        var menu = GetComponent<Menu>();
-        if (menu != null)
+        // Iterate all Menu components in the scene and close/destroy matching ones
+        var menus = FindObjectsOfType<Menu>();
+        Debug.Log(this);
+        bool anyClosed = false;
+        foreach (var m in menus)
         {
-            menu.Close();
-            return;
+            Debug.Log("Checking Menu: " + m);
+            if (m.gameObject != null && m.gameObject.name.Contains("FishData"))
+            {
+                m.Close();
+                Destroy(m.gameObject);
+                anyClosed = true;
+            }
         }
-
-        Destroy(gameObject);
     }
 }
