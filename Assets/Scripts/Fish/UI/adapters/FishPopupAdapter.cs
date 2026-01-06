@@ -63,17 +63,45 @@ public class FishPopupAdapter : MonoBehaviour, IFishPopupReceiver
     public void OnCloseClicked()
     {
         // Iterate all Menu components in the scene and close/destroy matching ones
-        var menus = FindObjectsOfType<Menu>();
-        Debug.Log(this);
-        bool anyClosed = false;
+        var menus = FindObjectsByType<Menu>(FindObjectsSortMode.None);
+        GameObject padre = GameObject.Find("Canvas");
+        GameObject principalMenu = padre.transform.Find("StartGame").gameObject;
+
+        if (principalMenu == null)
+        {
+            // Fallback to find inactive object
+            var allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+            foreach (var obj in allObjects)
+            {
+                if (obj.name == "Menu" && obj.scene.IsValid())
+                {
+                    principalMenu = obj;
+                    break;
+                }
+            }
+        }
+
         foreach (var m in menus)
         {
-            Debug.Log("Checking Menu: " + m);
             if (m.gameObject != null && m.gameObject.name.Contains("FishData"))
             {
                 m.Close();
                 Destroy(m.gameObject);
-                anyClosed = true;
+                
+                if (principalMenu != null)
+                {
+                    principalMenu.SetActive(true);
+                    foreach (Transform childTransform in principalMenu.transform)
+                    {
+                        if(childTransform.name == "start")
+                        {
+                            continue;
+                        }else{
+                            var menuScript = childTransform.GetComponent<Menu>();
+                            menuScript.Open();
+                        }
+                    }
+                }
             }
         }
     }
