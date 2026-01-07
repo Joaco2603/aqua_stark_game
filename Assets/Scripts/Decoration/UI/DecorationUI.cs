@@ -1,58 +1,75 @@
 using UnityEngine;
 using UnityEngine.UI;
+using Decoration;
 using System.Collections.Generic;
 
 public class DecorationUI : MonoBehaviour
 {
 	[SerializeField] private Canvas targetCanvas;
 	[SerializeField] private Transform mapContainer;
-	// [SerializeField] private List<Button> buttonPrefabs = new List<Button>();
-	private Transform defaultParent;
+    [SerializeField] private Transform defaultParent;
 
-	[System.Serializable]
-	public struct IconPrefabPair
+	[SerializeField] private List<DecorationData> decorationData = new List<DecorationData>();
+
+	void Start()
 	{
-		public Sprite icon;
-		public GameObject prefab;
+		ValidateFields(decorationData);
 	}
 
-	[SerializeField] private List<IconPrefabPair> iconPrefabPairs = new List<IconPrefabPair>();
-
-	// Runtime lookup (not serialized) construido desde la lista anterior
-	private Dictionary<Sprite, GameObject> iconToPrefabLookup;
-
-	private void EnsureIconLookup()
-	{
-		if (iconToPrefabLookup != null) return;
-		iconToPrefabLookup = new Dictionary<Sprite, GameObject>();
-		foreach (var p in iconPrefabPairs)
+	public void ValidateFields( List<DecorationData> data )
+    {
+		foreach(var item in data)
 		{
-			if (p.icon == null) continue;
-			if (!iconToPrefabLookup.ContainsKey(p.icon))
-				iconToPrefabLookup.Add(p.icon, p.prefab);
-			else
-				iconToPrefabLookup[p.icon] = p.prefab;
+            if (item.prefab == null)
+            {
+                Debug.LogWarning($"DecorationData ID {item.id} ('{item.name}') tiene un prefab null.");
+            }
+            if (item.icon == null)
+            {
+                Debug.LogWarning($"DecorationData ID {item.id} ('{item.name}') tiene un icono null.");
+            }
+            if (string.IsNullOrEmpty(item.name))
+            {
+                Debug.LogWarning($"DecorationData ID {item.id} tiene un nombre vacío.");
+            }
+            if(item.quantity < 0)
+            {
+                Debug.LogWarning($"DecorationData ID {item.id} ('{item.name}') tiene una cantidad negativa: {item.quantity}.");
+            }
+            if(item.description == null)
+            {
+                Debug.LogWarning($"DecorationData ID {item.id} ('{item.name}') tiene una descripción null.");
+            }
 		}
-	}
+    }
+
+    public List<DecorationData> GetDecorationDataList()
+    {
+        return decorationData;
+    }
 
 	public GameObject GetPrefabForIcon(Sprite icon)
 	{
-		EnsureIconLookup();
-		if (icon == null) return null;
-		iconToPrefabLookup.TryGetValue(icon, out var prefab);
-		return prefab;
+        foreach (var data in decorationData)
+        {
+            if (data.icon == icon)
+            {
+                return data.prefab;
+            }
+        }
+        return null;
 	}
 
     public int GetDecorationCount()
     {
-        return iconPrefabPairs.Count;
+        return decorationData.Count;
     }
 
     public Sprite GetIconAtIndex(int index)
     {
-        if (index >= 0 && index < iconPrefabPairs.Count)
+        if (index >= 0 && index < decorationData.Count)
         {
-            return iconPrefabPairs[index].icon;
+            return decorationData[index].icon;
         }
         return null;
     }

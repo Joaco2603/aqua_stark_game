@@ -10,7 +10,12 @@ public class DecorationManager : MonoBehaviour
 {
     [Header("UI Reference")]
     [SerializeField] private DecorationUI decorationUI;
-    [SerializeField] private CameraOrbit cameraOrbit;
+    [SerializeField] private Button deleteButton; 
+
+    [Header("Scripts Reference")]
+    [SerializeField] private CameraOrbit cameraOrbitScript;
+    [SerializeField] private Placement placementScript;
+
 
     [Header("Map Settings")]
     [SerializeField] private List<Vector2> mapPositions = new List<Vector2>()
@@ -27,9 +32,45 @@ public class DecorationManager : MonoBehaviour
 
     [SerializeField] private GameObject backgroundButtonPrefab;
 
+    public static DecorationManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     private void Start()
     {
+        if (decorationUI != null)
+        {
+            decorationUI.ValidateFields( decorationUI.GetDecorationDataList() );
+        }
+        ListListeners();
         PlaceDecorationsOnMap();
+    }
+
+    private void ListListeners(){
+        deleteButton.onClick.AddListener(ComportamientoEspecial);
+    }
+
+    private void ComportamientoEspecial()
+    {
+        Debug.Log("Botón de borrar presionado sin selección.");
+    }
+
+    public void SelectDecoration(DecorationController decoration)
+    {
+        if (decoration != null)
+        {
+            decoration.SetupDeleteButton(deleteButton);
+        }
     }
 
     public void PlaceDecorationsOnMap()
@@ -66,18 +107,18 @@ public class DecorationManager : MonoBehaviour
                     if (btn != null)
                     {
                         GameObject prefab = decorationUI.GetPrefabForIcon(icon);
-                        if (prefab != null && cameraOrbit != null)
+                        if (prefab != null && cameraOrbitScript != null)
                         {
                             btn.onClick.AddListener(() => {
                                 decorationUI.SetVisible(false);
-                                cameraOrbit.StartPlacing(prefab, () => {
+                                placementScript.StartPlacing(prefab, cameraOrbitScript.Target, () => {
                                     decorationUI.SetVisible(true);
                                 });
                             });
                         }
                         else
                         {
-                            Debug.LogWarning($"Prefab o CameraOrbit es null para el icono: {icon.name}");
+                            Debug.LogWarning($"Prefab o placementScript es null para el icono: {icon.name}");
                         }
                     }
                     else

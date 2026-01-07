@@ -71,6 +71,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -4134861983691299244, guid: 4a1b99a15c7f2ba4684fec8efc9403db, type: 3}
       insertIndex: -1
       addedObject: {fileID: -4330564911766361235}
+    - targetCorrespondingSourceObject: {fileID: -4134861983691299244, guid: 4a1b99a15c7f2ba4684fec8efc9403db, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4137105884972145252}
   m_SourcePrefab: {fileID: 3150474306388093854, guid: 4a1b99a15c7f2ba4684fec8efc9403db, type: 3}
 --- !u!1 &8821310761653369719 stripped
 GameObject:
@@ -125,3 +128,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &4137105884972145252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8821310761653369719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feaa571976ad437418c7ce36b4b7053a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DecorationController
+  enableDrag: 1
+  enableDelete: 1
+  rotateButton: {fileID: 0}
+  deleteButton: {fileID: 0}

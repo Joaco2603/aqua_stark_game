@@ -6,18 +6,23 @@ using UnityEngine;
 /// </summary>
 public class MenuManager : MonoBehaviour
 {
+    [SerializeField] private bool firstActiveMenu = false;
+
     [SerializeField] private Menu firstMenu;
     private readonly Stack<Menu> menuHistory = new Stack<Menu>();
+    
     
     private void Start()
     {
         if (firstMenu != null)
         {
             OpenMenu(firstMenu);
+            return;
         }
-        else
+
+        if(firstActiveMenu)
         {
-            Debug.LogError("MenuManager: First menu is not assigned!");
+            Debug.LogWarning("MenuManager: First menu is not assigned!");
         }
     }
     
