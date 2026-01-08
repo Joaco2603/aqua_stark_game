@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 using Decoration;
 
 /// <summary>
@@ -10,12 +11,10 @@ public class DecorationManager : MonoBehaviour
 {
     [Header("UI Reference")]
     [SerializeField] private DecorationUI decorationUI;
-    [SerializeField] private Button deleteButton; 
 
     [Header("Scripts Reference")]
     [SerializeField] private CameraOrbit cameraOrbitScript;
     [SerializeField] private Placement placementScript;
-
 
     [Header("Map Settings")]
     [SerializeField] private List<Vector2> mapPositions = new List<Vector2>()
@@ -52,27 +51,10 @@ public class DecorationManager : MonoBehaviour
         {
             decorationUI.ValidateFields( decorationUI.GetDecorationDataList() );
         }
-        ListListeners();
         PlaceDecorationsOnMap();
     }
 
-    private void ListListeners(){
-        deleteButton.onClick.AddListener(ComportamientoEspecial);
-    }
-
-    private void ComportamientoEspecial()
-    {
-        Debug.Log("Botón de borrar presionado sin selección.");
-    }
-
-    public void SelectDecoration(DecorationController decoration)
-    {
-        if (decoration != null)
-        {
-            decoration.SetupDeleteButton(deleteButton);
-        }
-    }
-
+    
     public void PlaceDecorationsOnMap()
     {
         if (decorationUI == null)
@@ -85,19 +67,7 @@ public class DecorationManager : MonoBehaviour
         {
             // Use a sprite from DecorationUI
             Sprite icon = decorationUI.GetIconAtIndex(i);
-            
-            if (icon == null)
-            {
-                // Only warn if we expect an icon for this position (i.e. if we have fewer icons than positions)
-                if (i < decorationUI.GetDecorationCount())
-                {
-                     Debug.LogWarning($"Posición {i} ({mapPositions[i]}): El icono es null en 'Icon Prefab Pairs' de DecorationUI.");
-                }
-                // If we just ran out of icons, maybe that's intended, or we can warn:
-                // Debug.LogWarning($"Posición {i}: No hay suficientes elementos en 'Icon Prefab Pairs' para cubrir esta posición.");
-            }
-            else
-            {
+
                 // Crear el item sin ocultarlo aún
                 GameObject item = decorationUI.CreateMapItem(mapPositions[i], icon, false, backgroundButtonPrefab);
                 
@@ -116,23 +86,14 @@ public class DecorationManager : MonoBehaviour
                                 });
                             });
                         }
-                        else
-                        {
-                            Debug.LogWarning($"Prefab o placementScript es null para el icono: {icon.name}");
-                        }
                     }
-                    else
-                    {
-                        Debug.LogWarning($"El item no tiene componente Button: {item.name}");
-                    }
-
+                    
                     // Ocultar después de asignar el listener
                     if (createMapItemsHidden)
                     {
                         item.SetActive(false);
                     }
                 }
-            }
         }
     }
 }

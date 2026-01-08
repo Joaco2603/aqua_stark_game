@@ -1,24 +1,41 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Collider))]
 public class DecorationController : MonoBehaviour
 {
 	[Header("Interacción")]
 	public bool enableDrag = true;
 	public bool enableDelete = true;
 
-	bool dragging = false;
-	Vector3 dragOffset;
-	Plane dragPlane;
+	[Header("UI Reference")]
+	public Button deleteButton;
+
+	[Header("Selección")]
+	public LayerMask interactableMask = ~0; // Por defecto todas las capas
+	public Camera targetCamera; // Si está vacío, usa Camera.main
+
+	private bool dragging = false;
+	private Vector3 dragOffset;
+	private Plane dragPlane;
 
 	bool selected = false;
 
 	Renderer[] renderers;
 	Color[] originalColors;
+	Rigidbody rb;
 
 	void Start()
 	{
 		renderers = GetComponentsInChildren<Renderer>();
+		rb = GetComponent<Rigidbody>();
+		if (rb != null && enableDrag)
+		{
+			// Si vamos a mover el objeto por transform, hacerlo kinematic evita
+			// conflictos con la física (teleportaciones, fuerzas, etc.).
+			rb.isKinematic = true;
+		}
 		if (renderers != null && renderers.Length > 0)
 		{
 			originalColors = new Color[renderers.Length];
@@ -32,40 +49,128 @@ public class DecorationController : MonoBehaviour
 		}
 	}
 
-	void OnMouseDown()
+	void Update()
 	{
-        ShowDecorationInfo();
-		Highlight(true);
-		
-		if (DecorationManager.Instance != null)
+		HandleInput();
+	}
+
+	#region Funciones Reutilizables de Movimiento
+
+	/// <summary>
+	/// Función principal que maneja el input del mouse. Puede ser llamada externamente.
+	/// </summary>
+	public void HandleInput()
+	{
+		var cam = targetCamera != null ? targetCamera : Camera.main;
+		if (cam == null) return;
+
+		var mouse = Mouse.current;
+		if (mouse == null) return;
+
+		if (mouse.leftButton.wasPressedThisFrame)
 		{
-			DecorationManager.Instance.SelectDecoration(this);
+			HandleMouseDown(cam, mouse);
+		}
+
+		if (dragging && mouse.leftButton.isPressed)
+		{
+			HandleDragging(cam, mouse);
+		}
+
+		if (dragging && mouse.leftButton.wasReleasedThisFrame)
+		{
+			HandleMouseUp();
 		}
 	}
 
-    void ShowDecorationInfo()
-    {
-        UpdateDecoration();
-    }
+	/// <summary>
+	/// Maneja el click inicial del mouse
+	/// </summary>
+	public void HandleMouseDown(Camera cam, Mouse mouse)
+	{
+		Vector2 screenPos = mouse.position.ReadValue();
+		Ray ray = cam.ScreenPointToRay(screenPos);
+		
+		int layerToIgnore = LayerMask.NameToLayer("Ignore Raycast");
+		interactableMask &= ~(1 << layerToIgnore);
 
-    void UpdateDecoration()
-    {
-        selected = true;
-		if (!enableDrag) return;
+		if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, interactableMask))
+		{
+			bool isThisObject = hit.collider != null && hit.collider.transform != null && hit.collider.transform.IsChildOf(transform);
+			Debug.Log("Raycast hit: " + hit.collider.name + ", isThisObject: " + isThisObject);
+			
+			if (isThisObject)
+			{
+				Debug.Log("Selected decoration");
+				SelectThis();
 
-		Camera cam = Camera.main;
-		if (cam == null) return;
+				if (enableDrag)
+				{
+					StartDragging(ray);
+				}
+			}
+		}
+	}
 
-		// Usamos un plano horizontal a la altura del objeto para moverlo en XZ
+	/// <summary>
+	/// Inicia el arrastre del objeto
+	/// </summary>
+	public void StartDragging(Ray ray)
+	{
 		dragPlane = new Plane(Vector3.up, transform.position);
-		Ray ray = cam.ScreenPointToRay(Input.mousePosition);
 		if (dragPlane.Raycast(ray, out float enter))
 		{
-			Vector3 hit = ray.GetPoint(enter);
-			dragOffset = transform.position - hit;
+			Vector3 hitPoint = ray.GetPoint(enter);
+			dragOffset = transform.position - hitPoint;
 			dragging = true;
 		}
-    }
+	}
+
+	/// <summary>
+	/// Maneja el movimiento mientras se arrastra
+	/// </summary>
+	public void HandleDragging(Camera cam, Mouse mouse)
+	{
+		Vector2 screenPos = mouse.position.ReadValue();
+		Ray ray = cam.ScreenPointToRay(screenPos);
+		
+		if (dragPlane.Raycast(ray, out float enter))
+		{
+			Vector3 hitPoint = ray.GetPoint(enter);
+			MoveDecoration(hitPoint + dragOffset);
+		}
+	}
+
+	/// <summary>
+	/// Mueve la decoración a una posición específica
+	/// </summary>
+	public void MoveDecoration(Vector3 newPosition)
+	{
+		transform.position = newPosition;
+	}
+
+	/// <summary>
+	/// Maneja cuando se suelta el mouse
+	/// </summary>
+	public void HandleMouseUp()
+	{
+		Debug.Log("Stopped dragging decoration");
+		dragging = false;
+	}
+
+	#endregion
+
+	void SelectThis()
+	{
+		selected = true;
+		ShowDecorationInfo();
+		Highlight(true);
+	}
+
+	void ShowDecorationInfo()
+	{
+		Debug.Log("Showing decoration info");
+	}
 
 	public void SetupDeleteButton(Button deleteButton)
 	{
@@ -73,34 +178,16 @@ public class DecorationController : MonoBehaviour
 		
 		deleteButton.onClick.RemoveAllListeners();
 		deleteButton.onClick.AddListener(() => {
-        	DeleteDecoration();
-  	  	});
+	        DeleteDecoration();
+	  	});
 	}
 
-    void DeleteDecoration()
-    {
+	void DeleteDecoration()
+	{
 		if (enableDelete && selected)
 		{
 			Destroy(gameObject);
 		}
-    }
-
-	void OnMouseDrag()
-	{
-		if (!dragging) return;
-		Camera cam = Camera.main;
-		if (cam == null) return;
-		Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-		if (dragPlane.Raycast(ray, out float enter))
-		{
-			Vector3 hit = ray.GetPoint(enter);
-			transform.position = hit + dragOffset;
-		}
-	}
-
-	void OnMouseUp()
-	{
-		dragging = false;
 	}
 
 	void Highlight(bool on)
@@ -114,3 +201,4 @@ public class DecorationController : MonoBehaviour
 		}
 	}
 }
+

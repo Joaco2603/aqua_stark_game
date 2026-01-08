@@ -23,6 +23,10 @@ namespace Decoration
         [Header("Pan Settings")]
         [SerializeField] private float panSpeed = 0.02f;
 
+        [Header("Interaction Gate")]
+        [Tooltip("Capas que bloquean la órbita/pan cuando el cursor está sobre ellas.")]
+        [SerializeField] private LayerMask blockOrbitMask = 0;
+
         private float _currentX = 0.0f;
         private float _currentY = 0.0f;
         private bool _isMoveMode = false;
@@ -52,10 +56,29 @@ namespace Decoration
             if (target == null) return;
             if (Mouse.current == null) return;
 
+            // Para pan se requiere modo activo y tecla R presionada.
+            bool rHeld = Keyboard.current != null && Keyboard.current.rKey.isPressed;
+
             // Solo procesar si se mantiene presionado el botón izquierdo del mouse
-            else if (Mouse.current.leftButton.isPressed)
+            if (Mouse.current.leftButton.isPressed && rHeld)
             {
+                // Si el puntero está sobre una capa interactuable, no orbitar/panear.
+                var cam = GetComponent<Camera>();
+                if (cam == null) cam = Camera.main;
+                if (cam != null && blockOrbitMask.value != 0)
+                {
+                    Vector2 screenPos = Mouse.current.position.ReadValue();
+                    Ray ray = cam.ScreenPointToRay(screenPos);
+                    if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, blockOrbitMask))
+                    {
+                        // Bloquear control de cámara este frame para no interferir.
+                        return;
+                    }
+                }
+
                 Vector2 delta = Mouse.current.delta.ReadValue();
+
+                
 
                 if (_isMoveMode)
                 {
