@@ -1020,6 +1020,14 @@ PrefabInstance:
       value: -25.1
       objectReference: {fileID: 0}
     - target: {fileID: -3022669341477700364, guid: 6c2fea02bc7b4084cbcb0903e44c3ba7, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 811.7025
+      objectReference: {fileID: 0}
+    - target: {fileID: -3022669341477700364, guid: 6c2fea02bc7b4084cbcb0903e44c3ba7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -4.1234
+      objectReference: {fileID: 0}
+    - target: {fileID: -3022669341477700364, guid: 6c2fea02bc7b4084cbcb0903e44c3ba7, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0.3
       objectReference: {fileID: 0}
@@ -1273,7 +1281,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DecorationManager
   decorationUI: {fileID: 865299150}
-  deleteButton: {fileID: 9079810003724923188, guid: dab217af4dd02c24cafba4c20cec8d79, type: 3}
   cameraOrbitScript: {fileID: 1458206229}
   placementScript: {fileID: 865299155}
   mapPositions:
@@ -1736,7 +1743,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7968232601889742967, guid: f3d9894d52dc8f64dac753c4ce2bc83c, type: 3}
       propertyPath: m_LocalScale.y
-      value: 507.90564
+      value: 508.0915
       objectReference: {fileID: 0}
     - target: {fileID: 7968232601889742967, guid: f3d9894d52dc8f64dac753c4ce2bc83c, type: 3}
       propertyPath: m_LocalScale.z
@@ -1752,7 +1759,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7968232601889742967, guid: f3d9894d52dc8f64dac753c4ce2bc83c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -23.7821
+      value: -23.7828
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2282,8 +2289,8 @@ Transform:
   m_GameObject: {fileID: 1820390610}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: -3.5086, y: 0.3, z: 26.75}
-  m_LocalScale: {x: 794.68774, y: 371.37213, z: 371.37213}
+  m_LocalPosition: {x: -1.2934, y: 0.3, z: 26.75}
+  m_LocalScale: {x: 855.8787, y: 371.37213, z: 371.37213}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 862931731}
