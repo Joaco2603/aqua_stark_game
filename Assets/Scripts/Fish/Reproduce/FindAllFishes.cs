@@ -5,7 +5,16 @@ namespace Fish.Reproduce.Utils
 {
 	public class FindAllFishes : MonoBehaviour
 	{
-		[SerializeField] private GameObject FishContainer;
+		// Usa por defecto el GameObject que contiene este componente
+		private GameObject FishContainer;
+
+		// Última lista encontrada; accesible desde otros scripts
+		public GameObject[] LastFoundFishes { get; private set; } = new GameObject[0];
+
+		private void Awake()
+		{
+			FishContainer = gameObject;
+		}
 
 		// Devuelve todos los GameObjects que están dentro de FishContainer (recursivo)
 		public GameObject[] FindAll()
@@ -18,7 +27,14 @@ namespace Fish.Reproduce.Utils
 				AddRecursive(child, list);
 			}
 
-			return list.ToArray();
+			LastFoundFishes = list.ToArray();
+			return LastFoundFishes;
+		}
+
+		// Actualiza la lista y la devuelve (útil para otros scripts)
+		public GameObject[] RefreshFoundFishes()
+		{
+			return FindAll();
 		}
 
 		private void AddRecursive(Transform node, List<GameObject> outList)

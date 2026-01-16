@@ -1905,33 +1905,12 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8594785893823075459, guid: 4c166a1cdcd19a64a9d71111e49d17b6, type: 3}
   m_PrefabInstance: {fileID: 2313916121861805632}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1100175419}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4492f86b8b27ab4469dd8fcc93e2dcea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FeedFish
---- !u!1 &1100175419 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2087654039996660388, guid: 4c166a1cdcd19a64a9d71111e49d17b6, type: 3}
-  m_PrefabInstance: {fileID: 2313916121861805632}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1100175426
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1100175419}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0535b051db7d29047ba224fb2dcd61f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FishData
-  fishName: Fish
-  experience: 10
-  hunger: 5
-  popupMenuPrefab: {fileID: 9190036479180930035, guid: 8393c0d07ae331b428e841fc52108aa7, type: 3}
 --- !u!4 &1138744021 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6156682065894214656, guid: 4c166a1cdcd19a64a9d71111e49d17b6, type: 3}
@@ -3505,6 +3484,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c6798aa737bf22469e26cb55ff5f4a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuManager
+  firstActiveMenu: 0
   firstMenu: {fileID: 3192915515772629125}
 --- !u!1 &2007821427 stripped
 GameObject:
@@ -3851,9 +3831,6 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2087654039996660388, guid: 4c166a1cdcd19a64a9d71111e49d17b6, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1100175426}
     - targetCorrespondingSourceObject: {fileID: 2896255046055071966, guid: 4c166a1cdcd19a64a9d71111e49d17b6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2081715073}

@@ -1,4 +1,5 @@
 using UnityEngine;
+using Fish.Entities;
 
 public class Reproduce : MonoBehaviour
 {
@@ -12,5 +13,10 @@ public class Reproduce : MonoBehaviour
     void Update()
     {
         
+    }
+
+    FishEntity CreateFish(int id, string name, int experience, float hunger = 0f, GameObject prefab = null)
+    {
+        return new FishEntity(id, name, experience, hunger, prefab);
     }
 }
