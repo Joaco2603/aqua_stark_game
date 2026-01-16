@@ -6,20 +6,18 @@ using Fish.Entities;
 
 public class FishPopup : MonoBehaviour
 {
-    public Canvas canvasTarget;
+    public GameObject canvasTarget;
     public TextMeshProUGUI nameText;
     public Slider experienceSlider;
     public Slider hungerSlider;
     public TextMeshProUGUI expValueText;
     public TextMeshProUGUI hungerValueText;
-    public Button closeButton;
     public FishEntity fishEntity;
 
     private Camera _mainCamera;
 
     void Awake()
     {
-        if (closeButton != null) closeButton.onClick.AddListener(OnCloseClicked);
         if (experienceSlider != null) experienceSlider.onValueChanged.AddListener(OnExpChanged);
         if (hungerSlider != null) hungerSlider.onValueChanged.AddListener(OnHungerChanged);
     }
@@ -41,9 +39,15 @@ public class FishPopup : MonoBehaviour
             // If we hit THIS GameObject, trigger the interaction
             if (hit.transform == transform)
             {
+                ShowPopup();
                 UpdateTexts();
             }
         }
+    }
+
+    void ShowPopup()
+    {
+        canvasTarget.GetComponent<Menu>().Open();
     }
 
     void OnExpChanged(float val)
@@ -76,18 +80,5 @@ public class FishPopup : MonoBehaviour
 
         if (expValueText != null) expValueText.text = fishEntity.experience.ToString();
         if (hungerValueText != null) hungerValueText.text = fishEntity.hunger.ToString();
-    }
-
-    void OnCloseClicked()
-    {
-        // If Menu component is present, let MenuManager handle closing via Back or close logic.
-        var menu = GetComponent<Menu>();
-        if (menu != null)
-        {
-            menu.Close();
-            return;
-        }
-
-        Debug.LogError("FishPopup: OnCloseClicked called but no Menu component found to handle closing.");
     }
 }
