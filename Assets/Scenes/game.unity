@@ -2165,7 +2165,8 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -147
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1771997667169468171, guid: 2c0c19c6a263dc44e97544f382d12225, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -2537,13 +2538,25 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1093663739}
         m_TargetAssemblyTypeName: Menu, Assembly-CSharp
-        m_MethodName: 
+        m_MethodName: Close
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 227962804}
+        m_TargetAssemblyTypeName: Menu, Assembly-CSharp
+        m_MethodName: Close
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -2595,15 +2608,15 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1093663738}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.004560906}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 3192915515772629121}
+  m_Father: {fileID: 2004636611}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -355.66, y: 384.07}
+  m_AnchoredPosition: {x: -355.65952, y: 189.0746}
   m_SizeDelta: {x: 34.29, y: 34.69}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1100175419 stripped
@@ -4919,6 +4932,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1207104350}
+  - {fileID: 1093663743}
   - {fileID: 3192915515772629121}
   - {fileID: 62943341}
   - {fileID: 476682920}
@@ -5743,9 +5757,6 @@ PrefabInstance:
     m_RemovedGameObjects:
     - {fileID: 1697226769345218348, guid: b3772c8d22feab14d8a93a48ad4b447d, type: 3}
     m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 4015408126819602413, guid: b3772c8d22feab14d8a93a48ad4b447d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1093663743}
     - targetCorrespondingSourceObject: {fileID: 4015408126819602413, guid: b3772c8d22feab14d8a93a48ad4b447d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1770179089}

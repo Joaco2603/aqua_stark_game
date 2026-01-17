@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Fish.Reproduce.Utils
+namespace Fish.Reproduce
 {
 	public class FindAllFishes : MonoBehaviour
 	{
-		// Usa por defecto el GameObject que contiene este componente
-		private GameObject FishContainer;
+		[SerializeField] private GameObject FishContainer;
 
 		// Última lista encontrada; accesible desde otros scripts
 		public GameObject[] LastFoundFishes { get; private set; } = new GameObject[0];
@@ -14,6 +13,12 @@ namespace Fish.Reproduce.Utils
 		private void Awake()
 		{
 			FishContainer = gameObject;
+		}
+
+		public bool validateCountFishes(int minCount)
+		{
+			var fishes = FindAll();
+			return fishes.Length >= minCount;
 		}
 
 		// Devuelve todos los GameObjects que están dentro de FishContainer (recursivo)
@@ -44,14 +49,6 @@ namespace Fish.Reproduce.Utils
 			{
 				AddRecursive(child, outList);
 			}
-		}
-
-		// Método accesible desde el menú contextual del componente en el Inspector
-		[ContextMenu("Find All Fishes")]
-		private void FindAndLog()
-		{
-			var all = FindAll();
-			Debug.Log($"Found {all.Length} objects under {(FishContainer != null ? FishContainer.name : "null")}");
 		}
 	}
 }

@@ -1,4 +1,5 @@
 using UnityEngine; 
+using Fish.Entities;
 
 [RequireComponent(typeof(Rigidbody))] 
 public class FishMove : MonoBehaviour 
@@ -25,7 +26,7 @@ public class FishMove : MonoBehaviour
     [SerializeField] private float feedTurnLerp = 6f;
     [SerializeField] private string foodTag = "Food";
     [SerializeField] private Transform defaultFoodTarget;
-    [SerializeField] private int hungerRestoreAmount = 15;
+    [SerializeField] private int hungerRestoreAmount = 10;
 
     private Rigidbody rb; 
     private Vector3 initialPosition; 
@@ -188,7 +189,7 @@ public class FishMove : MonoBehaviour
     {
         feeding = true;
         foodTarget = food != null ? food : defaultFoodTarget;
-        rb.linearVelocity = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
         changeTimer = directionChangeInterval * 0.5f;
     }
 
@@ -237,7 +238,8 @@ public class FishMove : MonoBehaviour
         if (foodTarget == null || !foodTarget.gameObject.activeInHierarchy)
         {
             StopFeeding(); // Si la comida desaparece o alguien más se la come
-            HungerManager.Instance.Add(hungerRestoreAmount);
+            FishEntity entity = GetComponent<FishEntity>();
+            if (entity != null) entity.hunger += hungerRestoreAmount;
             return;
         }
 

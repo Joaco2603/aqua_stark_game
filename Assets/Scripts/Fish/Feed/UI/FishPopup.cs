@@ -10,6 +10,7 @@ public class FishPopup : MonoBehaviour
     public TextMeshProUGUI nameText;
     public Slider experienceSlider;
     public Slider hungerSlider;
+    public Slider GeneralHungerSlider;
     public TextMeshProUGUI expValueText;
     public TextMeshProUGUI hungerValueText;
     public FishEntity fishEntity;
