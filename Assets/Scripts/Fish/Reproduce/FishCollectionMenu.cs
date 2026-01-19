@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using System.Collections.Generic;
 using Fish.Entities;
 
@@ -27,7 +28,7 @@ namespace Fish.Reproduce
         {
             fishFinder = GetComponent<FindAllFishes>();
             reproducer = GetComponent<Reproduce>();
-            
+            Debug.Log(fishFinder);
             if (fishFinder == null)
                 Debug.LogError("FindAllFishes component not found on this GameObject.");
                 
@@ -39,6 +40,40 @@ namespace Fish.Reproduce
                 reproduceButton.onClick.AddListener(OnReproduceClicked);
                 reproduceButton.interactable = false;
             }
+            
+            ConfigureLayout();
+        }
+
+        private void ConfigureLayout()
+        {
+            if (fishListContainer != null)
+            {
+                // Try to get existing layout group
+                LayoutGroup layoutGroup = fishListContainer.GetComponent<LayoutGroup>();
+
+                // If no layout group, add VerticalLayoutGroup by default
+                if (layoutGroup == null)
+                {
+                    VerticalLayoutGroup vLayout = fishListContainer.gameObject.AddComponent<VerticalLayoutGroup>();
+                    vLayout.spacing = 20;
+                    vLayout.childAlignment = TextAnchor.UpperCenter;
+                    vLayout.childControlWidth = true;
+                    vLayout.childControlHeight = false;
+                    vLayout.childForceExpandHeight = false;
+                }
+                else
+                {
+                    // Ensure spacing if layout exists
+                    if (layoutGroup is HorizontalOrVerticalLayoutGroup hvGroup)
+                    {
+                        if (hvGroup.spacing < 5) hvGroup.spacing = 20;
+                    }
+                    else if (layoutGroup is GridLayoutGroup gridGroup)
+                    {
+                         if (gridGroup.spacing.y < 5) gridGroup.spacing = new Vector2(gridGroup.spacing.x, 20);
+                    }
+                }
+            }
         }
 
         
@@ -48,10 +83,7 @@ namespace Fish.Reproduce
         public void RefreshCollection()
         {
             if (fishFinder == null)
-            {
-                Debug.LogError("FindAllFishes component not available.");
-                return;
-            }
+                fishFinder = GetComponent<FindAllFishes>();
 
             // Get all fishes
             GameObject[] allFishes = fishFinder.FindAll();
@@ -107,14 +139,14 @@ namespace Fish.Reproduce
             }
 
             // Mostrar nombre del pez en el botón
-            Text nameText = itemUI.GetComponentInChildren<Text>();
+            TextMeshProUGUI nameText = itemUI.GetComponentInChildren<TextMeshProUGUI>();
             if (nameText != null)
             {
-                nameText.text = fish.name;
+                nameText.text = !string.IsNullOrEmpty(fish.fishName) ? fish.fishName : fish.name;
             }
 
             // Buscar componentes de texto para mostrar información adicional
-            Text[] textComponents = itemUI.GetComponentsInChildren<Text>();
+            TextMeshProUGUI[] textComponents = itemUI.GetComponentsInChildren<TextMeshProUGUI>();
             if (textComponents.Length > 1) textComponents[1].text = $"ID: {fish.id}";
             if (textComponents.Length > 2) textComponents[2].text = $"Exp: {fish.experience}";
             if (textComponents.Length > 3) textComponents[3].text = $"Hambre: {fish.hunger:F1}";
