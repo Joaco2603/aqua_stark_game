@@ -5,9 +5,31 @@ namespace Fish.Reproduce
 {
     public class Reproduce : MonoBehaviour
     {
+        bool isReproducing = false;
+
         public FishEntity CreateFish(int id, string name, int experience, float hunger = 0f, GameObject prefab = null)
         {
             return new FishEntity(id, name, experience, hunger, prefab);
+        }
+
+        bool isReproducingEnabled(FishEntity[] parents)
+        {
+           if (parents == null || parents.Length < 2) 
+            {
+                Debug.LogError("Se necesitan al menos 2 padres para reproducir.");
+                isReproducing = false;
+                return false;
+            }
+            foreach(FishEntity fish in parents)
+            {
+                if (!fish.isReproductionEnabled)
+                {
+                    Debug.LogError("No puede reproducirse en este momento.");
+                    isReproducing = false;
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>
@@ -15,12 +37,14 @@ namespace Fish.Reproduce
         /// </summary>
         public FishEntity ReproduceEntities(FishEntity[] parents, int newId, string newName)
         {
-            if (parents == null || parents.Length < 2) 
+            if(!isReproducing)
             {
-                Debug.LogError("Se necesitan al menos 2 padres para reproducir.");
+                Debug.LogWarning("El sistema de reproducción está deshabilitado.");
                 return null;
             }
-            return ReproduceEntities(parents[0], parents[1], newId, newName);
+            Debug.Log("Reproduciendo peces...");
+            FishEntity child = ReproduceEntities(parents[0], parents[1], newId, newName);
+            return child;
         }
 
         /// <summary>

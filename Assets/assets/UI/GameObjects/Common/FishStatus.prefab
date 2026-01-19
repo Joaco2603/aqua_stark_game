@@ -42,7 +42,6 @@ GameObject:
   m_Component:
   - component: {fileID: 9040244307619090419}
   - component: {fileID: 3923600613598179063}
-  - component: {fileID: 1771997667169468171}
   m_Layer: 0
   m_Name: Status
   m_TagString: Untagged
@@ -122,21 +121,6 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &1771997667169468171
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3296281921994952729}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a175d70ec8be6c4d8d4d0d9e9447f4a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HungryStatus
-  maxHunger: 100
-  wellFedThreshold: 40
-  loadBar: {fileID: 0}
 --- !u!1 &3938669560639047631
 GameObject:
   m_ObjectHideFlags: 0

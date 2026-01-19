@@ -12,7 +12,10 @@ namespace Fish.Reproduce
 
 		private void Awake()
 		{
-			FishContainer = gameObject;
+			if (FishContainer == null)
+			{
+				FishContainer = gameObject;
+			}
 		}
 
 		public bool validateCountFishes(int minCount)
