@@ -5,11 +5,44 @@ namespace Fish.Reproduce
 {
     public class Reproduce : MonoBehaviour
     {
-        bool isReproducing = false;
+        bool isReproducing = true;
+        Vector3 spawnPosition = new Vector3(-22.42f, 9.41f, 20.135f);
+        [Header("Opcional: contenedor padre para peces instanciados")]
+        [SerializeField] private Transform parentContainer;
 
-        public FishEntity CreateFish(int id, string name, int experience, float hunger = 0f, GameObject prefab = null)
+        public FishEntity CreateFish(int id, string name, int experience, float hunger = 0f, GameObject prefab = null, Transform parent = null)
         {
-            return new FishEntity(id, name, experience, hunger, prefab);
+            if (prefab == null)
+            {
+                Debug.LogError("No se puede crear un pez sin prefab.");
+                return null;
+            }
+
+            // Instanciar el prefab en la escena
+            Transform usedParent = parent != null ? parent : parentContainer;
+            GameObject fishObject = Instantiate(prefab, spawnPosition, Quaternion.identity);
+            if (usedParent != null)
+            {
+                fishObject.transform.SetParent(usedParent);
+                fishObject.transform.localPosition = spawnPosition; // asegurar que quede en la posición del contenedor
+            }
+            
+            // Obtener o añadir el componente FishEntity
+            FishEntity fishEntity = fishObject.GetComponent<FishEntity>();
+            if (fishEntity == null)
+            {
+                fishEntity = fishObject.AddComponent<FishEntity>();
+            }
+
+            // Configurar las propiedades
+            fishEntity.id = id;
+            fishEntity.fishName = name;
+            fishEntity.experience = experience;
+            fishEntity.hunger = hunger;
+            fishEntity.prefab = prefab;
+            fishEntity.isReproductionEnabled = true;
+
+            return fishEntity;
         }
 
         bool isReproducingEnabled(FishEntity[] parents)

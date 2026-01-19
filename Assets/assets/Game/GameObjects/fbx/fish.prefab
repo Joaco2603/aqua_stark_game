@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 730778178051284681}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 20.12039, y: -11.64762, z: -23.555367}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -333,10 +333,10 @@ MonoBehaviour:
   feedStopDistance: 0.3
   feedSpeedMultiplier: 1.4
   feedSurfaceHoldOffset: 0.35
-  loseInterestTime: 5
   feedTurnLerp: 6
   foodTag: Food
   defaultFoodTarget: {fileID: 0}
+  hungerRestoreAmount: 10
 --- !u!198 &357567090944912910
 ParticleSystem:
   m_ObjectHideFlags: 0
