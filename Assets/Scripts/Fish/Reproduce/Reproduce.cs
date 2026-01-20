@@ -6,7 +6,7 @@ namespace Fish.Reproduce
     public class Reproduce : MonoBehaviour
     {
         bool isReproducing = true;
-        Vector3 spawnPosition = new Vector3(-22.42f, 9.41f, 20.135f);
+        Vector3 spawnPosition = new Vector3(8.42f, 9.41f, -75.135f);
         [Header("Opcional: contenedor padre para peces instanciados")]
         [SerializeField] private Transform parentContainer;
 
@@ -18,13 +18,17 @@ namespace Fish.Reproduce
                 return null;
             }
 
-            // Instanciar el prefab en la escena
+            // Instanciar el prefab en la escena en la posición de spawn y con el padre correcto
             Transform usedParent = parent != null ? parent : parentContainer;
-            GameObject fishObject = Instantiate(prefab, spawnPosition, Quaternion.identity);
+            GameObject fishObject;
             if (usedParent != null)
             {
-                fishObject.transform.SetParent(usedParent);
-                fishObject.transform.localPosition = spawnPosition; // asegurar que quede en la posición del contenedor
+                // Instanciar con parent preservando la posición en el mundo
+                fishObject = Instantiate(prefab, spawnPosition, Quaternion.identity, usedParent);
+            }
+            else
+            {
+                fishObject = Instantiate(prefab, spawnPosition, Quaternion.identity);
             }
             
             // Obtener o añadir el componente FishEntity
@@ -41,6 +45,10 @@ namespace Fish.Reproduce
             fishEntity.hunger = hunger;
             fishEntity.prefab = prefab;
             fishEntity.isReproductionEnabled = true;
+            
+            // Forzar posición de spawn (antes de que Start() guarde initialPosition)
+            fishObject.transform.position = spawnPosition;
+            Debug.Log($"Reproduce CreateFish: Posición forzada a {spawnPosition}, posición actual: {fishObject.transform.position}");
 
             return fishEntity;
         }

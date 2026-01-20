@@ -337,6 +337,8 @@ MonoBehaviour:
   foodTag: Food
   defaultFoodTarget: {fileID: 0}
   hungerRestoreAmount: 10
+  timeToEatFood: 2
+  foodDetectionRadius: 10
 --- !u!198 &357567090944912910
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -5160,9 +5162,10 @@ MonoBehaviour:
   waterLayer:
     serializedVersion: 2
     m_Bits: 0
-  wormLifetime: 5
   fishTankCenter: {x: 2, y: 9, z: 22}
   zOffset: -17
+  cursorTexture: {fileID: 2800000, guid: ed53848e60b2bfe429bc5ea7a3d20320, type: 3}
+  cursorHotspot: {x: 0, y: 0}
 --- !u!1 &2262345221901463234
 GameObject:
   m_ObjectHideFlags: 0

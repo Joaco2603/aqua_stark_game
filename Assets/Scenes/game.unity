@@ -6278,16 +6278,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FeedFish
   fish: {fileID: 1975167807}
-  wormPrefab: {fileID: -6247694177509291895, guid: 937b729bd16ece8478ab26cfad91d7b4, type: 3}
+  wormPrefab: {fileID: 4081535698963348761, guid: 14d3bb4831d16d9468e79e89fc8342bd, type: 3}
   uiToHide: {fileID: 1621399324}
   mainCamera: {fileID: 497203075}
   wormFollowDistance: 10
   waterLayer:
     serializedVersion: 2
     m_Bits: 0
-  wormLifetime: 5
   fishTankCenter: {x: 2, y: 9, z: 22}
   zOffset: -9
+  cursorTexture: {fileID: 2800000, guid: 99f41ba75834cae41bbf6197ef897a0d, type: 3}
+  cursorHotspot: {x: 0, y: 0}
 --- !u!199 &1975167805
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -11121,6 +11122,8 @@ MonoBehaviour:
   foodTag: Food
   defaultFoodTarget: {fileID: 0}
   hungerRestoreAmount: 15
+  timeToEatFood: 2
+  foodDetectionRadius: 5
 --- !u!54 &1975167808
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -12305,6 +12308,10 @@ PrefabInstance:
       propertyPath: mainCamera
       value: 
       objectReference: {fileID: 497203075}
+    - target: {fileID: 8594785893823075459, guid: 4c166a1cdcd19a64a9d71111e49d17b6, type: 3}
+      propertyPath: wormPrefab
+      value: 
+      objectReference: {fileID: 4081535698963348761, guid: 14d3bb4831d16d9468e79e89fc8342bd, type: 3}
     - target: {fileID: 8594785893823075459, guid: 4c166a1cdcd19a64a9d71111e49d17b6, type: 3}
       propertyPath: wormLifetime
       value: 5

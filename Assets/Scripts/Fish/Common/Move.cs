@@ -20,13 +20,15 @@ public class FishMove : MonoBehaviour
     [SerializeField] private bool resetOnEnable = true; 
 
     [Header("Feeding")]
-    [SerializeField] private float feedStopDistance = 0.3f;
+    [SerializeField] private float feedStopDistance = 1.0f; // Distancia aumentada para comer
     [SerializeField] private float feedSpeedMultiplier = 1.4f;
     [SerializeField] private float feedSurfaceHoldOffset = 0.35f;
     [SerializeField] private float feedTurnLerp = 6f;
     [SerializeField] private string foodTag = "Food";
     [SerializeField] private Transform defaultFoodTarget;
     [SerializeField] private int hungerRestoreAmount = 10;
+    [SerializeField] private float timeToEatFood = 2f; // Tiempo en segundos para comer la comida
+    [SerializeField] private float foodDetectionRadius = 10f; // Radio aumentado para detectar comida cercana
 
     private Rigidbody rb; 
     private Vector3 initialPosition; 
@@ -35,6 +37,9 @@ public class FishMove : MonoBehaviour
     private float changeTimer; 
     private bool feeding;
     private Transform foodTarget;
+    private float feedingTimer; // Timer para controlar cuándo come la comida
+    private bool isCloseToFood; // Flag para saber si está cerca de la comida
+    private bool hasBeenEnabledBefore; // Flag para evitar reset en primera habilitación
  
     private void Awake() 
     { 
@@ -44,14 +49,26 @@ public class FishMove : MonoBehaviour
         rb.useGravity = false;
         rb.linearDamping = 1f; // Añade un poco de resistencia
         
+        // Asegurar valores mínimos para detección de comida
+        if (feedStopDistance < 1.5f)
+            feedStopDistance = 1.5f;
+        if (foodDetectionRadius < 10f)
+            foodDetectionRadius = 10f;
+    }
+    
+    private void Start()
+    {
+        // Guardar posición inicial en Start() para que Reproduce.cs pueda establecerla primero
         initialPosition = transform.position; 
         centerPoint = transform.position; 
-        PickNewDirection(true); 
-    } 
+        PickNewDirection(true);
+        Debug.Log($"FishMove Start: initialPosition = {initialPosition}");
+    }
  
     private void OnEnable() 
     { 
-        if (resetOnEnable) 
+        // Solo resetear si ya fue habilitado antes (no en el spawn inicial)
+        if (resetOnEnable && hasBeenEnabledBefore) 
         { 
             transform.position = initialPosition; 
             if (rb != null) 
@@ -61,7 +78,8 @@ public class FishMove : MonoBehaviour
             } 
             centerPoint = initialPosition; 
             PickNewDirection(true); 
-        } 
+        }
+        hasBeenEnabledBefore = true;
     }
 
     private void FixedUpdate()
@@ -75,7 +93,15 @@ public class FishMove : MonoBehaviour
             return; // Detiene la ejecución aquí si está alimentándose
         }
 
-        // Estado 2: Navegación normal (Wandering)
+        // Estado 2: Buscar comida cercana automáticamente
+        Transform nearbyFood = FindNearestFood();
+        if (nearbyFood != null)
+        {
+            StartFeeding(nearbyFood);
+            return;
+        }
+
+        // Estado 3: Navegación normal (Wandering)
         UpdateWanderLogic();
     }
 
@@ -184,19 +210,51 @@ public class FishMove : MonoBehaviour
         GameObject taggedFood = GameObject.FindWithTag(foodTag);
         return taggedFood != null ? taggedFood.transform : null;
     }
+    
+    // Buscar la comida más cercana dentro del radio de detección
+    private Transform FindNearestFood()
+    {
+        GameObject[] allFood = GameObject.FindGameObjectsWithTag(foodTag);
+        
+        if (allFood.Length == 0)
+            return null;
+        
+        Transform nearest = null;
+        float minDistance = foodDetectionRadius * foodDetectionRadius;
+        
+        foreach (GameObject food in allFood)
+        {
+            if (food == null || !food.activeInHierarchy)
+                continue;
+                
+            float distSq = (food.transform.position - transform.position).sqrMagnitude;
+            
+            if (distSq < minDistance)
+            {
+                minDistance = distSq;
+                nearest = food.transform;
+            }
+        }
+        
+        return nearest;
+    }
 
     public void StartFeeding(Transform food = null)
     {
         feeding = true;
         foodTarget = food != null ? food : defaultFoodTarget;
-            rb.linearVelocity = Vector3.zero;
+        rb.linearVelocity = Vector3.zero;
         changeTimer = directionChangeInterval * 0.5f;
+        feedingTimer = 0f; // Resetear timer
+        isCloseToFood = false; // Resetear flag
     }
 
     public void StopFeeding()
     {
         feeding = false;
         foodTarget = null;
+        feedingTimer = 0f;
+        isCloseToFood = false;
         PickNewDirection(true);
     }
  
@@ -235,42 +293,88 @@ public class FishMove : MonoBehaviour
 
     private void HandleFeeding()
     {
+        // Si la comida fue destruida o desactivada
         if (foodTarget == null || !foodTarget.gameObject.activeInHierarchy)
         {
-            StopFeeding(); // Si la comida desaparece o alguien más se la come
-            FishEntity entity = GetComponent<FishEntity>();
-            if (entity != null) entity.hunger += hungerRestoreAmount;
+            // Buscar otra comida cercana
+            Transform newFood = FindNearestFood();
+            if (newFood != null)
+            {
+                StartFeeding(newFood);
+                return;
+            }
+            
+            // No hay más comida, volver a comportamiento normal
+            StopFeeding();
             return;
         }
 
         Vector3 targetPos = foodTarget.position;
-
-        // Mantener la comida dentro de los límites de agua para el pez
-        //float maxY = waterLevel - surfaceOffset;
-        //float minY = waterLevel - waterDepth + bottomOffset;
-        //targetPos.y = Mathf.Clamp(targetPos.y, minY + 0.1f, maxY - 0.05f);
-
         Vector3 toFood = targetPos - transform.position;
-        float distanceSq = toFood.sqrMagnitude;
+        float distance = toFood.magnitude;
 
-        // 2. Lógica de "Comer" (Cuando está muy cerca)
-        if (distanceSq <= feedStopDistance * feedStopDistance)
+        // Si está lo suficientemente cerca
+        if (distance <= feedStopDistance)
         {
-            EatFood();
-            return;
+            // Comenzar a contar el tiempo
+            if (!isCloseToFood)
+            {
+                isCloseToFood = true;
+                feedingTimer = 0f;
+                Debug.Log("Pez cerca de la comida, comenzando timer...");
+            }
+            
+            feedingTimer += Time.fixedDeltaTime;
+            
+            // Después de 2 segundos cerca, comer la comida
+            if (feedingTimer >= timeToEatFood)
+            {
+                EatFood();
+                return;
+            }
+            
+            // Mientras espera, reducir velocidad y mantenerse cerca
+            rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, Vector3.zero, turnLerp * Time.fixedDeltaTime);
         }
-
-        // Movimiento hacia la comida
-        currentDirection = toFood.normalized;
-        ApplyMovement(feedSpeedMultiplier);
+        else
+        {
+            // Si se aleja, resetear el timer
+            if (isCloseToFood)
+            {
+                Debug.Log("Pez se alejó de la comida, reseteando timer");
+            }
+            isCloseToFood = false;
+            feedingTimer = 0f;
+            
+            // Movimiento hacia la comida
+            currentDirection = toFood.normalized;
+            ApplyMovement(feedSpeedMultiplier);
+        }
     }
 
     private void EatFood()
     {
         if (foodTarget != null)
         {
-            StopFeeding();
+            // Restaurar hambre si tiene el componente
+            FishEntity entity = GetComponent<FishEntity>();
+            if (entity != null) entity.hunger += hungerRestoreAmount;
+            
+            // Destruir la comida
             Destroy(foodTarget.gameObject);
+            foodTarget = null;
+            
+            // Buscar otra comida cercana
+            Transform newFood = FindNearestFood();
+            if (newFood != null)
+            {
+                StartFeeding(newFood);
+            }
+            else
+            {
+                // No hay más comida, volver a comportamiento normal
+                StopFeeding();
+            }
         }
     }
 

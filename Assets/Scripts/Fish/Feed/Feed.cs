@@ -13,13 +13,16 @@ public class FeedFish : MonoBehaviour
     [Header("Configuración")]
     [SerializeField] private float wormFollowDistance = 10f;
     [SerializeField] private LayerMask waterLayer;
-    [SerializeField] private float wormLifetime = 5f;
     [SerializeField] private Vector3 fishTankCenter = new Vector3(-2f, 9f, -22.94f);
     [SerializeField] private float zOffset = 0f;
+    
+    [Header("Cursor Personalizado")]
+    [SerializeField] private Texture2D cursorTexture;
+    [SerializeField] private Vector2 cursorHotspot = new Vector2(0, 0);
 
     private GameObject currentWormCursor;
     private bool feedingMode;
-    private GameObject spawnedWorm;
+    private Texture2D originalCursor;
 
 
     private void Start()
@@ -35,13 +38,13 @@ public class FeedFish : MonoBehaviour
 
         UpdateWormCursor();
 
-        // Reemplazar Input.GetMouseButtonDown(0)
+        // Click izquierdo para colocar alimento
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             PlaceWorm();
         }
 
-        // Reemplazar Input.GetKeyDown(KeyCode.Escape)
+        // Solo Escape para salir del modo alimentación
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             CancelFeeding();
@@ -75,11 +78,26 @@ public class FeedFish : MonoBehaviour
 
         // Crear cursor de lombriz
         currentWormCursor = Instantiate(wormPrefab);
+
+        Rigidbody rb = currentWormCursor.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            // El cursor debe seguir al mouse, no a la física
+            rb.useGravity = false;
+            rb.isKinematic = true;
+            rb.Sleep();
+        }
         
         // Deshabilitar colisiones del cursor si tiene collider
         Collider[] colliders = currentWormCursor.GetComponentsInChildren<Collider>();
         foreach (var col in colliders)
             col.enabled = false;
+        
+        // Cambiar cursor del mouse si hay textura personalizada
+        if (cursorTexture != null)
+        {
+            Cursor.SetCursor(cursorTexture, cursorHotspot, CursorMode.Auto);
+        }
     }
 
     private void UpdateWormCursor()
@@ -113,7 +131,7 @@ public class FeedFish : MonoBehaviour
             return;
 
         // Spawnear lombriz real en la posición del cursor
-        spawnedWorm = Instantiate(wormPrefab, currentWormCursor.transform.position, Quaternion.identity);
+        GameObject spawnedWorm = Instantiate(wormPrefab, currentWormCursor.transform.position, Quaternion.identity);
 
         // Habilitar colisiones
         Collider[] colliders = spawnedWorm.GetComponentsInChildren<Collider>();
@@ -124,29 +142,44 @@ public class FeedFish : MonoBehaviour
         if (colliders.Length == 0)
         {
             SphereCollider sc = spawnedWorm.AddComponent<SphereCollider>();
-            sc.radius = 0.1f;
+            sc.radius = 0.5f; // Radio más grande para mejor detección
+            sc.isTrigger = false; // NO trigger, collider normal
+        }
+        else
+        {
+            // Asegurar que los colliders NO sean triggers para colisiones reales
+            foreach (var col in colliders)
+                col.isTrigger = false;
         }
 
-        // Agregar rigidbody si no tiene (para que caiga al agua)
+        // Agregar rigidbody para que caiga al agua y sea detectable por la física
         if (spawnedWorm.GetComponent<Rigidbody>() == null)
         {
             Rigidbody rb = spawnedWorm.AddComponent<Rigidbody>();
+            rb.useGravity = true; // Activar gravedad para que caiga
+            rb.isKinematic = false; // Permitimos respuesta física
+            rb.linearDamping = 0.5f; // Resistencia moderada
+            rb.angularDamping = 0.5f;
+        }
+        else
+        {
+            // Si ya tiene rigidbody, configurarlo
+            Rigidbody rb = spawnedWorm.GetComponent<Rigidbody>();
             rb.useGravity = true;
+            rb.isKinematic = false;
             rb.linearDamping = 0.5f;
+            rb.angularDamping = 0.5f;
+            rb.WakeUp();
+        }
+        
+        // Agregar tag de Food si no lo tiene
+        if (string.IsNullOrEmpty(spawnedWorm.tag) || spawnedWorm.tag == "Untagged")
+        {
+            spawnedWorm.tag = "Food";
         }
 
-        // Destruir el cursor
-        Destroy(currentWormCursor);
-        currentWormCursor = null;
-
-        // Decirle al pez que vaya a por la comida
-        fish.StartFeeding(spawnedWorm.transform);
-
-        // Destruir la lombriz después de un tiempo
-        Destroy(spawnedWorm, wormLifetime);
-
-        // Salir del modo alimentación
-        EndFeedingMode();
+        // Salir automáticamente del modo alimentación después de colocar un alimento
+        CancelFeeding();
     }
 
     private void CancelFeeding()
@@ -160,6 +193,9 @@ public class FeedFish : MonoBehaviour
     private void EndFeedingMode()
     {
         feedingMode = false;
+
+        // Restaurar cursor normal
+        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
 
         // Mostrar UI de nuevo
         if (uiToHide != null)
