@@ -1,75 +1,85 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
+using Fish.Entities;
 
 public class FishPopup : MonoBehaviour
 {
+    public GameObject canvasTarget;
     public TextMeshProUGUI nameText;
     public Slider experienceSlider;
     public Slider hungerSlider;
+    public Slider GeneralHungerSlider;
     public TextMeshProUGUI expValueText;
     public TextMeshProUGUI hungerValueText;
-    public Button closeButton;
+    public FishEntity fishEntity;
 
-    private FishData fish;
+    private Camera _mainCamera;
 
     void Awake()
     {
-        if (closeButton != null) closeButton.onClick.AddListener(OnCloseClicked);
         if (experienceSlider != null) experienceSlider.onValueChanged.AddListener(OnExpChanged);
         if (hungerSlider != null) hungerSlider.onValueChanged.AddListener(OnHungerChanged);
     }
 
-    public void SetData(FishData f)
+    void Update()
     {
-        fish = f;
-        if (nameText != null) nameText.text = f.fishName;
+        if (_mainCamera == null) _mainCamera = Camera.main;
+        if (_mainCamera == null) return;
 
-        if (experienceSlider != null)
+        // Check if the primary pointer (mouse/touch) was pressed this frame
+        if (Pointer.current == null || !Pointer.current.press.wasPressedThisFrame) return;
+
+        // Create a ray from the camera through the pointer position
+        Ray ray = _mainCamera.ScreenPointToRay(Pointer.current.position.ReadValue());
+
+        // Perform the raycast
+        if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            experienceSlider.maxValue = Mathf.Max(1, f.experience * 2);
-            experienceSlider.value = f.experience;
+            // If we hit THIS GameObject, trigger the interaction
+            if (hit.transform == transform)
+            {
+                ShowPopup();
+                UpdateTexts();
+            }
         }
+    }
 
-        if (hungerSlider != null)
-        {
-            hungerSlider.maxValue = 100;
-            hungerSlider.value = f.hunger;
-        }
-
-        UpdateTexts();
+    void ShowPopup()
+    {
+        canvasTarget.GetComponent<Menu>().Open();
     }
 
     void OnExpChanged(float val)
     {
-        if (fish != null) fish.experience = Mathf.RoundToInt(val);
+        if (fishEntity != null) fishEntity.experience = Mathf.RoundToInt(val);
         UpdateTexts();
     }
 
     void OnHungerChanged(float val)
     {
-        if (fish != null) fish.hunger = Mathf.RoundToInt(val);
+        if (fishEntity != null) fishEntity.hunger = Mathf.RoundToInt(val);
         UpdateTexts();
     }
 
     void UpdateTexts()
     {
-        if (fish == null) return;
-        if (expValueText != null) expValueText.text = fish.experience.ToString();
-        if (hungerValueText != null) hungerValueText.text = fish.hunger.ToString();
-    }
+        if (fishEntity == null) return;
 
-    void OnCloseClicked()
-    {
-        // If Menu component is present, let MenuManager handle closing via Back or close logic.
-        var menu = GetComponent<Menu>();
-        if (menu != null)
+        if (nameText != null) nameText.text = fishEntity.fishName;
+
+        if (experienceSlider != null)
         {
-            menu.Close();
-            return;
+            experienceSlider.value = fishEntity.experience;
         }
 
-        // Fallback: destroy this popup GameObject
-        Destroy(gameObject);
+        if (hungerSlider != null)
+        {
+            hungerSlider.value = fishEntity.hunger;
+        }
+
+        if (expValueText != null) expValueText.text = fishEntity.experience.ToString();
+        if (hungerValueText != null) hungerValueText.text = fishEntity.hunger.ToString();
     }
 }

@@ -89,6 +89,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DecorationController
   enableDrag: 1
   enableDelete: 1
+  deleteButton: {fileID: 6277885763973794720, guid: 07cbf01bc9d69314485d99ac3b85af4c, type: 3}
   interactableMask:
     serializedVersion: 2
     m_Bits: 4294967295

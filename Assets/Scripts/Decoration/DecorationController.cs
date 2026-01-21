@@ -47,12 +47,20 @@ public class DecorationController : MonoBehaviour
 					originalColors[i] = Color.white;
 			}
 		}
+
+		// Hide delete button by default until this decoration is selected
+		if (deleteButton != null)
+		{
+			deleteButton.gameObject.SetActive(false);
+		}
 	}
 
 	void Update()
 	{
 		HandleInput();
 	}
+	
+	
 
 	#region Funciones Reutilizables de Movimiento
 
@@ -62,7 +70,11 @@ public class DecorationController : MonoBehaviour
 	public void HandleInput()
 	{
 		var cam = targetCamera != null ? targetCamera : Camera.main;
-		if (cam == null) return;
+		if (cam == null)
+		{
+			Debug.LogWarning("DecorationController: No camera found. Make sure Camera.main exists.");
+			return;
+		}
 
 		var mouse = Mouse.current;
 		if (mouse == null) return;
@@ -97,11 +109,9 @@ public class DecorationController : MonoBehaviour
 		if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, interactableMask))
 		{
 			bool isThisObject = hit.collider != null && hit.collider.transform != null && hit.collider.transform.IsChildOf(transform);
-			Debug.Log("Raycast hit: " + hit.collider.name + ", isThisObject: " + isThisObject);
 			
 			if (isThisObject)
 			{
-				Debug.Log("Selected decoration");
 				SelectThis();
 
 				if (enableDrag)
@@ -165,11 +175,35 @@ public class DecorationController : MonoBehaviour
 		selected = true;
 		ShowDecorationInfo();
 		Highlight(true);
+		
+		// Notificar al DecorationManager
+		if (DecorationManager.Instance != null)
+		{
+			DecorationManager.Instance.SelectDecoration(this);
+		}
 	}
 
 	void ShowDecorationInfo()
 	{
 		Debug.Log("Showing decoration info");
+
+		// Ensure the delete button is visible for this decoration and wired to delete
+		if (deleteButton != null)
+		{
+			deleteButton.gameObject.SetActive(true);
+			SetupDeleteButton(deleteButton);
+		}
+	}
+
+	void OnDisable()
+	{
+		// Cleanup listeners and hide button when this object is disabled/destroyed
+		if (deleteButton != null)
+		{
+			deleteButton.onClick.RemoveAllListeners();
+			if (deleteButton.gameObject != null)
+				deleteButton.gameObject.SetActive(false);
+		}
 	}
 
 	public void SetupDeleteButton(Button deleteButton)
